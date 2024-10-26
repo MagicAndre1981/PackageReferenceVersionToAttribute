@@ -1,0 +1,136 @@
+# For more information on GitHub Actions, refer to https://github.com/features/actions
+
+name: Build
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+    inputs:
+      release:
+        description: 'Publish extension to the Visual Studio Marketplace?'
+        required: true
+        default: 'false'
+
+jobs:
+
+  build:
+
+    strategy:
+      matrix:
+        configuration: [Debug, Release]
+
+    runs-on: windows-latest
+             # For a list of available runner types, refer to
+             # https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions#jobsjob_idruns-on
+
+    permissions:
+      # Write access is required to publish artifacts as Github Releases
+      contents: write
+
+    env:
+      Solution_Name: .\src\PackageReferenceVersionToAttribute.sln
+
+    steps:
+
+    - name: Set version number
+      run: |
+        $majorVersion = 1
+        $minorVersion = 0
+        $firstBuildYear = 2024
+        $currentDate = Get-Date
+        $currentDate = $currentDate.ToUniversalTime()
+        $currentYear = $currentDate.ToString("yyyy")
+        $buildYear = [Convert]::ToInt32($currentYear)
+        $currentMonthDay = $currentDate.ToString("MMdd")
+        $buildVersion = (($buildYear - $firstBuildYear) * 1200) + ([Convert]::ToInt32($currentMonthDay))
+        echo "VERSION=$majorVersion.$minorVersion.$buildVersion.${{ github.RUN_NUMBER }}" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf-8 -Append
+
+    - name: Read environmental variables
+      run: |
+        echo VERSION=${{ env.VERSION }}
+        echo GITHUB_WORKSPACE=${{ github.WORKSPACE }}
+
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Update vsixmanifest files
+      run: |
+        $files = Get-ChildItem "${{ github.WORKSPACE }}" -recurse -include "source.extension.vsixmanifest"
+        if (-not $files)
+        {
+            Write-Host "Didn't find any files to update."
+            exit 1
+        }
+        else
+        {
+            foreach ($file in $files) {
+                $xml = [xml](Get-Content($file))
+                attrib $file -r
+
+                $node = $xml.PackageManifest.Metadata.Identity
+                $node.Version = "${{ env.VERSION }}"
+
+                $xml.Save($file)
+                Write-Host "Version applied to '$file'"
+            }
+        }
+
+    - name: Setup MSBuild.exe
+      uses: microsoft/setup-msbuild@v2
+            # Adds MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
+
+    - name: Restore NuGet packages
+      run: msbuild $env:Solution_Name /t:Restore /p:Configuration=${{matrix.Configuration}}
+
+    - name: Build
+      run: msbuild $env:Solution_Name /p:Configuration=${{matrix.Configuration}}
+
+    - name: Upload build artifacts
+      uses: actions/upload-artifact@v4
+      # https://github.com/marketplace/actions/upload-a-build-artifact
+      with:
+        name: PackageReferenceVersionToAttributeExtension-${{ env.VERSION }} ${{matrix.Configuration}}
+        path: .\src\PackageReferenceVersionToAttributeExtension\bin\${{matrix.Configuration}}\PackageReferenceVersionToAttributeExtension.vsix
+        if-no-files-found: error
+
+    - name: Publish GitHub Release
+      if: ${{ matrix.Configuration == 'Release' && github.event.inputs.release == 'true' }}
+      uses: softprops/action-gh-release@v2.0.8
+      with:
+        name: v${{ env.VERSION }}
+        tag_name: v${{ env.VERSION }}
+        generate_release_notes: true
+        draft: true
+        prerelease: false
+        fail_on_unmatched_files: true
+        files: |
+          ./src/PackageReferenceVersionToAttributeExtension/bin/${{matrix.Configuration}}/PackageReferenceVersionToAttributeExtension.vsix
+
+    - name: Publish to Open VSIX
+      if: ${{ matrix.Configuration == 'Release' && github.event.inputs.release == 'true' }}
+      run: |
+        [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
+        $vsixFile = ".\src\PackageReferenceVersionToAttributeExtension\bin\${{matrix.Configuration}}\PackageReferenceVersionToAttributeExtension.vsix"
+        $url = "https://www.vsixgallery.com/api/upload"
+        [byte[]]$bytes = [System.IO.File]::ReadAllBytes($vsixFile)
+             
+        try {
+            $webclient = New-Object System.Net.WebClient
+            $webclient.UploadFile($url, $vsixFile) | Out-Null
+            'OK' | Write-Host -ForegroundColor Green
+        }
+        catch{
+            'FAIL' | Write-Error
+            $_.Exception.Response.Headers["x-error"] | Write-Error
+        }
+
+    - name: Publish extension to the Visual Studio Marketplace
+      if: ${{ matrix.Configuration == 'Release' && github.event.inputs.release == 'true' }}
+      uses: cezarypiatek/VsixPublisherAction@1.1
+      with:
+        extension-file: .\src\PackageReferenceVersionToAttributeExtension\bin\${{matrix.Configuration}}\PackageReferenceVersionToAttributeExtension.vsix
+        publish-manifest-file: .\src\PackageReferenceVersionToAttributeExtension\publishManifest.json
+        personal-access-code: ${{ secrets.VS_PUBLISHER_ACCESS_TOKEN }}

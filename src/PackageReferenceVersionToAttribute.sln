@@ -8,9 +8,18 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D471DF53-D163-4D29-A64B-5EA63BF9F1AF}"
 	ProjectSection(SolutionItems) = preProject
 		..\.gitignore = ..\.gitignore
+		..\LICENSE = ..\LICENSE
+		..\README.md = ..\README.md
 	EndProjectSection
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageReferenceVersionToAttributeExtensionTests", "PackageReferenceVersionToAttributeExtensionTests\PackageReferenceVersionToAttributeExtensionTests.csproj", "{BED0AA16-5B09-4841-88EC-6275DB90916E}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".github", ".github", "{32FC78C2-9D8C-46DB-A1C0-C345F618628F}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{5B79E7A6-2829-4322-B4A4-A1D44AC1789E}"
+	ProjectSection(SolutionItems) = preProject
+		..\.github\workflows\build.yml = ..\.github\workflows\build.yml
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -49,6 +58,10 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{32FC78C2-9D8C-46DB-A1C0-C345F618628F} = {D471DF53-D163-4D29-A64B-5EA63BF9F1AF}
+		{5B79E7A6-2829-4322-B4A4-A1D44AC1789E} = {32FC78C2-9D8C-46DB-A1C0-C345F618628F}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {4BDD4813-4B3B-48D4-A9F5-E30A24DAA05B}
