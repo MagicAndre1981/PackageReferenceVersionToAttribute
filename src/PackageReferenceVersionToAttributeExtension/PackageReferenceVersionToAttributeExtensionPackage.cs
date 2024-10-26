@@ -5,10 +5,16 @@
 namespace PackageReferenceVersionToAttributeExtension
 {
     using System;
+    using System.Reflection;
     using System.Runtime.InteropServices;
     using System.Threading;
     using Community.VisualStudio.Toolkit;
+    using Community.VisualStudio.Toolkit.DependencyInjection.Microsoft;
+    using EnvDTE;
+    using EnvDTE80;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.VisualStudio.Shell;
+    using PackageReferenceVersionToAttributeExtension.Services;
     using Task = System.Threading.Tasks.Task;
 
     /// <summary>
@@ -24,12 +30,33 @@ namespace PackageReferenceVersionToAttributeExtension
         expression: "Csproj",
         termNames: ["Csproj"],
         termValues: ["ActiveProjectCapability:CSharp"])]
-    public sealed class PackageReferenceVersionToAttributeExtensionPackage : ToolkitPackage
+    public sealed class PackageReferenceVersionToAttributeExtensionPackage : MicrosoftDIToolkitPackage<PackageReferenceVersionToAttributeExtensionPackage>
     {
+        /// <inheritdoc/>
+        protected override void InitializeServices(IServiceCollection services)
+        {
+            base.InitializeServices(services);
+
+            // register services
+            services.AddSingleton<FileSystemService>();
+
+            services.AddSingleton((serviceProvider)
+                => new LoggingService("PackageReferences Version to Attribute Extension"));
+
+            services.AddSingleton((serviceProvider)
+                => new ProjectService(
+                    VS.GetRequiredService<DTE, DTE2>(),
+                    serviceProvider.GetRequiredService<LoggingService>(),
+                    serviceProvider.GetRequiredService<FileSystemService>()));
+
+            // register commands
+            services.RegisterCommands(ServiceLifetime.Singleton, Assembly.GetExecutingAssembly());
+        }
+
         /// <inheritdoc/>
         protected override async Task InitializeAsync(CancellationToken cancellationToken, IProgress<ServiceProgressData> progress)
         {
-            await this.RegisterCommandsAsync();
+            await base.InitializeAsync(cancellationToken, progress);
         }
     }
 }

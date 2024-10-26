@@ -3,6 +3,7 @@
 // </copyright>
 
 using System.Reflection;
+using System.Runtime.CompilerServices;
 using PackageReferenceVersionToAttributeExtension;
 
 [assembly: AssemblyTitle(Vsix.Name)]
@@ -12,3 +13,5 @@ using PackageReferenceVersionToAttributeExtension;
 [assembly: AssemblyCopyright(Vsix.Author)]
 [assembly: AssemblyVersion(Vsix.Version)]
 [assembly: AssemblyFileVersion(Vsix.Version)]
+
+[assembly: InternalsVisibleTo("PackageReferenceVersionToAttributeExtensionTests")]
