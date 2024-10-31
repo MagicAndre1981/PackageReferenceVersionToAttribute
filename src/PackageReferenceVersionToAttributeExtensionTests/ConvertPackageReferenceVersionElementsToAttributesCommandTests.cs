@@ -4,16 +4,8 @@
 
 namespace PackageReferenceVersionToAttributeExtensionTests
 {
-    using System;
-    using System.Collections.Generic;
     using System.ComponentModel.Design;
-    using System.IO;
-    using System.Runtime.InteropServices;
     using System.Threading.Tasks;
-    using EnvDTE;
-    using EnvDTE80;
-    using Microsoft.VisualStudio;
-    using Microsoft.VisualStudio.ComponentModelHost;
     using Microsoft.VisualStudio.Sdk.TestFramework;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
@@ -21,6 +13,8 @@ namespace PackageReferenceVersionToAttributeExtensionTests
     using Moq;
     using PackageReferenceVersionToAttributeExtension;
     using PackageReferenceVersionToAttributeExtensionTests.Mocks;
+    using IAsyncServiceProvider = Microsoft.VisualStudio.Shell.Interop.COMAsyncServiceProvider.IAsyncServiceProvider;
+    using OleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
 
     /// <summary>
     /// Convert PackageReference version elements to attributes command tests.
@@ -69,7 +63,19 @@ namespace PackageReferenceVersionToAttributeExtensionTests
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             MockServiceProvider.Reset();
 
-            this.package = await SdkTestUtilities.LoadPackageAsync<PackageReferenceVersionToAttributeExtensionPackage>(Console.WriteLine);
+            this.package = new PackageReferenceVersionToAttributeExtensionPackage();
+
+            ServiceProvider globalProvider = ServiceProvider.GlobalProvider;
+            OleServiceProvider oleServiceProvider = globalProvider.GetService<OleServiceProvider, OleServiceProvider>();
+            ((IVsPackage)this.package).SetSite(oleServiceProvider);
+
+            Mock<IAsyncServiceProvider> mockAsyncServiceProvider = new();
+            Mock<IProfferAsyncService> mockPromotedServices = new();
+
+            await ((IAsyncLoadablePackageInitialize)this.package).Initialize(
+                mockAsyncServiceProvider.Object,
+                mockPromotedServices.Object,
+                mockPromotedServices.Object.GetServiceProgressCallback());
 
             this.mockVisualStudio = new MockVisualStudio(MockServiceProvider);
 
