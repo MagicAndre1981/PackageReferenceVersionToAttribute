@@ -149,7 +149,8 @@ namespace PackageReferenceVersionToAttributeExtensionTests
 
         /// <summary>
         /// Verifies that the <c>ExecuteAsync</c> method completes successfully
-        /// when one project is selected in the solution.
+        /// when one project is selected in the solution,
+        /// with mixed PackageReference Version styles.
         /// </summary>
         /// <returns>A task representing the asynchronous test operation.</returns>
         [TestMethod]
@@ -204,7 +205,8 @@ namespace PackageReferenceVersionToAttributeExtensionTests
 
         /// <summary>
         /// Verifies that the <c>ExecuteAsync</c> method completes successfully
-        /// when one project is selected in the solution.
+        /// when one project is selected in the solution,
+        /// with PackageReferences within nested conditional elements.
         /// </summary>
         /// <returns>A task representing the asynchronous test operation.</returns>
         [TestMethod]
