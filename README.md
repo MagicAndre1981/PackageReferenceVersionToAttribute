@@ -1,6 +1,6 @@
 # PackageReference Version to attribute
 
-This Visual Studio extension converts PackageReferences Version child element to attribute.
+This Visual Studio extension converts PackageReferences Version child elements to attributes.
 
 It works with C# csproj Visual Studio project files.
 
