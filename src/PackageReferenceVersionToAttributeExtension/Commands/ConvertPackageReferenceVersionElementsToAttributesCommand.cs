@@ -79,7 +79,32 @@ namespace PackageReferenceVersionToAttributeExtension
                         continue;
                     }
 
-                    await VS.StatusBar.ShowMessageAsync($"Converting PackageReference Version child elements to attributes in {Path.GetFileName(projectPath)}...");
+                    string message = $"Converting PackageReference Version child elements to attributes in the project file \"{projectPath}\"...";
+                    await this.loggingService.LogInfoAsync(message);
+                    await VS.StatusBar.ShowMessageAsync(message);
+
+                    var document = XDocument.Load(projectPath, LoadOptions.PreserveWhitespace);
+
+                    // Find all PackageReference elements with a <Version> child element
+                    // Use the XML namespace if one is set
+                    XNamespace ns = document.Root.GetDefaultNamespace();
+
+                    if (!string.IsNullOrWhiteSpace(ns.NamespaceName))
+                    {
+                        await this.loggingService.LogInfoAsync($"Found XML namespace \"{ns.NamespaceName}\".");
+                    }
+
+                    // Query for PackageReference elements
+                    var packageReferences = document.Descendants(ns != null ? ns + "PackageReference" : "PackageReference")
+                        .Where(pr => pr.Element(ns != null ? ns + "Version" : "Version") != null)
+                        .ToList();
+                    if (!packageReferences.Any())
+                    {
+                        await this.loggingService.LogInfoAsync($"No PackageReference Version child elements found in the project file \"{projectPath}\".");
+                        continue;
+                    }
+
+                    bool modified = false;
 
                     // backup project file
                     await this.fileSystemService.BackupFileAsync(projectPath);
@@ -87,17 +112,9 @@ namespace PackageReferenceVersionToAttributeExtension
                     // check out files from source control
                     await this.projectService.CheckOutFileFromSourceControlAsync(projectPath);
 
-                    var document = XDocument.Load(projectPath, LoadOptions.PreserveWhitespace);
-                    bool modified = false;
-
-                    // Find all PackageReference elements with a <Version> child element
-                    var packageReferences = document.Descendants("PackageReference")
-                        .Where(pr => pr.Element("Version") != null)
-                        .ToList();
-
                     foreach (var packageReference in packageReferences)
                     {
-                        var versionElement = packageReference.Element("Version");
+                        var versionElement = packageReference.Element(ns != null ? ns + "Version" : "Version");
                         if (versionElement != null)
                         {
                             // Move the Version element content to an attribute

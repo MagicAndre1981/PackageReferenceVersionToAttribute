@@ -300,6 +300,77 @@ namespace PackageReferenceVersionToAttributeExtensionTests
 
         /// <summary>
         /// Verifies that the <c>ExecuteAsync</c> method completes successfully
+        /// when one project is selected in the solution,
+        /// which contains an XML namespace.
+        /// </summary>
+        /// <returns>A task representing the asynchronous test operation.</returns>
+        [TestMethod]
+        public async Task ExecuteAsync_WithOneSelectedProjectWithAnXmlNamespace_SucceedsAsync()
+        {
+            // Arrange
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            using MockProject project = new(this.loggerFactory)
+            {
+                Name = "ProjectA",
+                Contents = """
+                    <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" Sdk="Microsoft.NET.Sdk.Uwp">
+
+                      <PropertyGroup>
+                        <TargetFramework>uap10.0</TargetFramework>
+                        <RootNamespace>ExampleUWPProject</RootNamespace>
+                        <AssemblyName>ExampleUWPProject</AssemblyName>
+                      </PropertyGroup>
+
+                      <ItemGroup>
+                        <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform">
+                            <Version>6.2.10</Version>
+                        </PackageReference>
+                        <PackageReference Include="Newtonsoft.Json">
+                            <Version>13.0.1</Version>
+                        </PackageReference>
+                        <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Controls">
+                            <Version>6.1.2</Version>
+                        </PackageReference>
+                        <PackageReference Include="Microsoft.Extensions.Logging">
+                            <Version>5.0.0</Version>
+                        </PackageReference>
+                      </ItemGroup>
+
+                    </Project>
+                    """,
+            };
+            this.mockVisualStudio.AddProjects(project);
+            this.mockVisualStudio.AddSelections(project);
+
+            // Act
+            this.command.Invoke(null);
+
+            // Assert
+            Assert.AreEqual(
+                """
+                <Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003" Sdk="Microsoft.NET.Sdk.Uwp">
+
+                  <PropertyGroup>
+                    <TargetFramework>uap10.0</TargetFramework>
+                    <RootNamespace>ExampleUWPProject</RootNamespace>
+                    <AssemblyName>ExampleUWPProject</AssemblyName>
+                  </PropertyGroup>
+
+                  <ItemGroup>
+                    <PackageReference Include="Microsoft.NETCore.UniversalWindowsPlatform" Version="6.2.10" />
+                    <PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+                    <PackageReference Include="Microsoft.Toolkit.Uwp.UI.Controls" Version="6.1.2" />
+                    <PackageReference Include="Microsoft.Extensions.Logging" Version="5.0.0" />
+                  </ItemGroup>
+
+                </Project>
+                """,
+                project.Contents);
+        }
+
+        /// <summary>
+        /// Verifies that the <c>ExecuteAsync</c> method completes successfully
         /// when two projects are selected in the solution.
         /// </summary>
         /// <returns>A task representing the asynchronous test operation.</returns>
