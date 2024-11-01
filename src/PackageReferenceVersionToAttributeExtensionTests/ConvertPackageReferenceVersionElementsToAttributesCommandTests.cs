@@ -18,6 +18,7 @@ namespace PackageReferenceVersionToAttributeExtensionTests
     using PackageReferenceVersionToAttributeExtensionTests.Setup;
     using IAsyncServiceProvider = Microsoft.VisualStudio.Shell.Interop.COMAsyncServiceProvider.IAsyncServiceProvider;
     using OleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
+    using Package = PackageReferenceVersionToAttributeExtension.Package;
     using ServiceProvider = Microsoft.VisualStudio.Shell.ServiceProvider;
 
     /// <summary>
@@ -26,7 +27,7 @@ namespace PackageReferenceVersionToAttributeExtensionTests
     [TestClass]
     public class ConvertPackageReferenceVersionElementsToAttributesCommandTests
     {
-        private PackageReferenceVersionToAttributeExtensionPackage package;
+        private Package package;
         private MenuCommand command;
         private MockVisualStudio mockVisualStudio;
         private DisposableServiceProvider serviceProvider;
@@ -72,7 +73,7 @@ namespace PackageReferenceVersionToAttributeExtensionTests
             MockServiceProvider.Reset();
             this.serviceProvider = ServiceProviderFactory.CreateServiceProvider();
 
-            this.package = new PackageReferenceVersionToAttributeExtensionPackage();
+            this.package = new Package();
 
             ServiceProvider globalProvider = ServiceProvider.GlobalProvider;
             OleServiceProvider oleServiceProvider = globalProvider.GetService<OleServiceProvider, OleServiceProvider>();
@@ -93,7 +94,7 @@ namespace PackageReferenceVersionToAttributeExtensionTests
 
             this.command = commandService.FindCommand(new CommandID(
                 PackageGuids.guidPackageReferenceVersionToAttributeExtensionCmdSet,
-                PackageIds.PackageReferenceVersionToAttributeCommand));
+                PackageIds.PackageReferenceVersionToAttributeProjectNodeCommand));
             Assert.IsNotNull(this.command);
 
             this.loggerFactory = this.serviceProvider.GetService<ILoggerFactory>();

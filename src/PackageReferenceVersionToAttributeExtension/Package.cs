@@ -13,6 +13,7 @@ namespace PackageReferenceVersionToAttributeExtension
     using EnvDTE;
     using EnvDTE80;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell;
     using PackageReferenceVersionToAttributeExtension.Services;
     using Task = System.Threading.Tasks.Task;
@@ -24,13 +25,21 @@ namespace PackageReferenceVersionToAttributeExtension
     [InstalledProductRegistration(Vsix.Name, Vsix.Description, Vsix.Version)]
     [ProvideMenuResource("Menus.ctmenu", 1)]
     [Guid(PackageGuids.guidPackageReferenceVersionToAttributeExtensionString)]
+    [ProvideAutoLoad(VSConstants.UICONTEXT.NoSolution_string, PackageAutoLoadFlags.BackgroundLoad)]
+    [ProvideAutoLoad(VSConstants.UICONTEXT.SolutionExists_string, PackageAutoLoadFlags.BackgroundLoad)]
     [ProvideUIContextRule(
-        contextGuid: PackageGuids.guidPackageReferenceVersionToAttributeExtensionUIRuleString,
+        contextGuid: PackageGuids.guidPackageReferenceVersionToAttributeExtensionProjectNodeUIRuleString,
         name: "Csproj",
         expression: "Csproj",
         termNames: ["Csproj"],
         termValues: ["ActiveProjectCapability:CSharp"])]
-    public sealed class PackageReferenceVersionToAttributeExtensionPackage : MicrosoftDIToolkitPackage<PackageReferenceVersionToAttributeExtensionPackage>
+    [ProvideUIContextRule(
+        contextGuid: PackageGuids.guidPackageReferenceVersionToAttributeExtensionSolutionNodeUIRuleString,
+        name: "Sln",
+        expression: "(SingleProject | MultipleProjects)",
+        termNames: ["SingleProject", "MultipleProjects"],
+        termValues: [VSConstants.UICONTEXT.SolutionHasSingleProject_string, VSConstants.UICONTEXT.SolutionHasMultipleProjects_string])]
+    public sealed class Package : MicrosoftDIToolkitPackage<Package>
     {
         /// <inheritdoc/>
         protected override void InitializeServices(IServiceCollection services)

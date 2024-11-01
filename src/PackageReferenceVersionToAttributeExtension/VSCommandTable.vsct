@@ -1,51 +1,133 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <CommandTable xmlns="http://schemas.microsoft.com/VisualStudio/2005-10-18/CommandTable" xmlns:xs="http://www.w3.org/2001/XMLSchema">
 
-  <!-- Defines the actual layout and type of the commands. -->
+    <!-- Defines the actual layout and type of the commands. -->
 
-  <!-- Include the IDs for all the commands exposed by VisualStudio. -->
-  <Extern href="stdidcmd.h"/>
+    <!-- Include the IDs for all the commands exposed by VisualStudio. -->
+    <Extern href="stdidcmd.h"/>
 
-  <!-- Include the command ids for the menus provided by the shell. -->
-  <Extern href="vsshlids.h"/>
+    <!-- Include the command ids for the menus provided by the shell. -->
+    <Extern href="vsshlids.h"/>
 
-  <!-- Include the image monikers for various images. -->
-  <Include href="KnownImageIds.vsct"/>
-  <Include href="VSGlobals.vsct"/>
+    <!-- Include the image monikers for various images. -->
+    <Include href="KnownImageIds.vsct"/>
+    <Include href="VSGlobals.vsct"/>
 
-  <Commands package="guidPackageReferenceVersionToAttributeExtension">
-    <Groups>
-      <Group guid="guidPackageReferenceVersionToAttributeExtensionCmdSet" id="PackageReferenceVersionToAttributeMenuGroup" priority="0x0600">
-        <Parent guid="VSMainMenu" id="ProjectNode"/>
-      </Group>
-    </Groups>
+    <Commands package="guidPackageReferenceVersionToAttributeExtension">
+        <Groups>
+            <Group guid="guidPackageReferenceVersionToAttributeExtensionCmdSet"
+                   id="ProjectNodeGroup"
+                   priority="0x0600">
+                <Parent guid="VSMainMenu"
+                        id="ProjectNode"/>
+            </Group>
+            <Group guid="guidPackageReferenceVersionToAttributeExtensionCmdSet"
+                   id="MultipleProjectNodesGroup"
+                   priority="0x0600">
+                <Parent guid="guidSHLMainMenu"
+                        id="IDM_VS_CTXT_XPROJ_MULTIPROJ" />
+            </Group>
+            <Group guid="guidPackageReferenceVersionToAttributeExtensionCmdSet"
+                   id="SolutionNodeGroup"
+                   priority="0x0600">
+                <Parent guid="VSMainMenu"
+                        id="SolutionNode" />
+            </Group>
+        </Groups>
 
-    <!--This section defines the elements the user can interact with, like a menu command or a button
+        <!--This section defines the elements the user can interact with, like a menu command or a button
         or combo box in a toolbar. -->
-    <Buttons>
-      <Button guid="guidPackageReferenceVersionToAttributeExtensionCmdSet" id="PackageReferenceVersionToAttributeCommand" priority="0x0100" type="Button">
-        <Parent guid="guidPackageReferenceVersionToAttributeExtensionCmdSet" id="PackageReferenceVersionToAttributeMenuGroup" />
-        <Icon guid="ImageCatalogGuid" id="PackageReference" />
-        <CommandFlag>IconIsMoniker</CommandFlag>
-        <CommandFlag>DynamicVisibility</CommandFlag>
-        <Strings>
-          <ButtonText>Convert PackageReference Version elements to attributes...</ButtonText>
-          <LocCanonicalName>.PackageReferenceVersionToAttributeExtension.ConvertPackageReferenceVersionElementsToAttributesCommand</LocCanonicalName>
-        </Strings>
-      </Button>
-    </Buttons>
-  </Commands>
+        <Buttons>
+            <!-- Project Node -->
+            <Button guid="guidPackageReferenceVersionToAttributeExtensionCmdSet"
+                    id="PackageReferenceVersionToAttributeProjectNodeCommand"
+                    priority="0x0100"
+                    type="Button">
+                <Parent guid="guidPackageReferenceVersionToAttributeExtensionCmdSet"
+                        id="ProjectNodeGroup" />
+                <Icon guid="ImageCatalogGuid"
+                      id="PackageReference" />
+                <CommandFlag>IconIsMoniker</CommandFlag>
+                <CommandFlag>DynamicVisibility</CommandFlag>
+                <Strings>
+                    <ButtonText>Convert PackageReference Version elements to attributes...</ButtonText>
+                    <LocCanonicalName>.PackageReferenceVersionToAttributeExtension.ConvertPackageReferenceVersionElementsToAttributesCommand</LocCanonicalName>
+                </Strings>
+            </Button>
+            
+            <!-- Multiple Project Nodes -->
+            <Button guid="guidPackageReferenceVersionToAttributeExtensionCmdSet"
+                    id="PackageReferenceVersionToAttributeMultipleProjectNodesCommand"
+                    priority="0x0100"
+                    type="Button">
+                <Parent guid="guidPackageReferenceVersionToAttributeExtensionCmdSet"
+                        id="MultipleProjectNodesGroup" />
+                <Icon guid="ImageCatalogGuid"
+                      id="PackageReference" />
+                <CommandFlag>IconIsMoniker</CommandFlag>
+                <CommandFlag>DynamicVisibility</CommandFlag>
+                <Strings>
+                    <ButtonText>Convert PackageReference Version elements to attributes...</ButtonText>
+                    <LocCanonicalName>.PackageReferenceVersionToAttributeExtension.ConvertPackageReferenceVersionElementsToAttributesCommand</LocCanonicalName>
+                </Strings>
+            </Button>
+
+            <!-- Solution Node -->
+            <Button guid="guidPackageReferenceVersionToAttributeExtensionCmdSet"
+                    id="PackageReferenceVersionToAttributeSolutionNodeCommand"
+                    priority="0x0100"
+                    type="Button">
+                <Parent guid="guidPackageReferenceVersionToAttributeExtensionCmdSet"
+                        id="SolutionNodeGroup" />
+                <Icon guid="ImageCatalogGuid"
+                      id="PackageReference" />
+                <CommandFlag>IconIsMoniker</CommandFlag>
+                <CommandFlag>DynamicVisibility</CommandFlag>
+                <Strings>
+                    <ButtonText>Convert PackageReference Version elements to attributes...</ButtonText>
+                    <LocCanonicalName>.PackageReferenceVersionToAttributeExtension.ConvertPackageReferenceVersionElementsToAttributesCommand</LocCanonicalName>
+                </Strings>
+            </Button>
+
+        </Buttons>
+    </Commands>
 
     <VisibilityConstraints>
-        <VisibilityItem guid="guidPackageReferenceVersionToAttributeExtensionCmdSet" id="PackageReferenceVersionToAttributeCommand" context="guidPackageReferenceVersionToAttributeExtensionUIRule" />
+        <VisibilityItem guid="guidPackageReferenceVersionToAttributeExtensionCmdSet"
+                        id="PackageReferenceVersionToAttributeProjectNodeCommand"
+                        context="guidPackageReferenceVersionToAttributeExtensionProjectNodeUIRule" />
+        <!--<VisibilityItem guid="guidPackageReferenceVersionToAttributeExtensionCmdSet"
+                        id="PackageReferenceVersionToAttributeMultipleProjectNodesCommand"
+                        context="guidPackageReferenceVersionToAttributeExtensionMultipleProjectNodesUIRule" />-->
+        
+        <VisibilityItem guid="guidPackageReferenceVersionToAttributeExtensionCmdSet"
+                        id="PackageReferenceVersionToAttributeSolutionNodeCommand"
+                        context="guidPackageReferenceVersionToAttributeExtensionSolutionNodeUIRule" />
     </VisibilityConstraints>
 
-  <Symbols>
-    <GuidSymbol name="guidPackageReferenceVersionToAttributeExtension" value="{32c53199-ebbf-4453-bf5c-4f44f2bb3c93}" />
-    <GuidSymbol name="guidPackageReferenceVersionToAttributeExtensionCmdSet" value="{0c128779-7aa4-463a-82f5-8e6eb5cc0412}">
-      <IDSymbol name="PackageReferenceVersionToAttributeMenuGroup" value="0x0001" />
-      <IDSymbol name="PackageReferenceVersionToAttributeCommand" value="0x0100" />
-    </GuidSymbol>
-    <GuidSymbol name="guidPackageReferenceVersionToAttributeExtensionUIRule" value="{e309983d-aa3b-4faa-a8db-96923c2c0d90}" />
-  </Symbols>
+    <Symbols>
+        <GuidSymbol name="guidPackageReferenceVersionToAttributeExtension"
+                    value="{32c53199-ebbf-4453-bf5c-4f44f2bb3c93}" />
+        <GuidSymbol name="guidPackageReferenceVersionToAttributeExtensionCmdSet"
+                    value="{0c128779-7aa4-463a-82f5-8e6eb5cc0412}">
+            <IDSymbol name="ProjectNodeGroup"
+                      value="0x0001" />
+            <IDSymbol name="MultipleProjectNodesGroup"
+                      value="0x0002" />
+            <IDSymbol name="SolutionNodeGroup"
+                      value="0x0003" />
+            <IDSymbol name="PackageReferenceVersionToAttributeProjectNodeCommand"
+                      value="0x0100" />
+            <IDSymbol name="PackageReferenceVersionToAttributeMultipleProjectNodesCommand"
+                      value="0x0101" />
+            <IDSymbol name="PackageReferenceVersionToAttributeSolutionNodeCommand"
+                      value="0x0102" />
+        </GuidSymbol>
+        <GuidSymbol name="guidPackageReferenceVersionToAttributeExtensionProjectNodeUIRule"
+                    value="{e309983d-aa3b-4faa-a8db-96923c2c0d90}" />
+        <!--<GuidSymbol name="guidPackageReferenceVersionToAttributeExtensionMultipleProjectNodesUIRule"
+                    value="{584a1a02-0a44-49f6-b05d-723e6b18c5a5}" />-->
+        <GuidSymbol name="guidPackageReferenceVersionToAttributeExtensionSolutionNodeUIRule"
+                    value="{e56530ff-9e50-4309-b551-c273bd2aab84}" />
+    </Symbols>
 </CommandTable>

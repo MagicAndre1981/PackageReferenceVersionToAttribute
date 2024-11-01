@@ -18,15 +18,22 @@ namespace PackageReferenceVersionToAttributeExtension
         public const string guidPackageReferenceVersionToAttributeExtensionCmdSetString = "0c128779-7aa4-463a-82f5-8e6eb5cc0412";
         public static Guid guidPackageReferenceVersionToAttributeExtensionCmdSet = new Guid(guidPackageReferenceVersionToAttributeExtensionCmdSetString);
 
-        public const string guidPackageReferenceVersionToAttributeExtensionUIRuleString = "e309983d-aa3b-4faa-a8db-96923c2c0d90";
-        public static Guid guidPackageReferenceVersionToAttributeExtensionUIRule = new Guid(guidPackageReferenceVersionToAttributeExtensionUIRuleString);
+        public const string guidPackageReferenceVersionToAttributeExtensionProjectNodeUIRuleString = "e309983d-aa3b-4faa-a8db-96923c2c0d90";
+        public static Guid guidPackageReferenceVersionToAttributeExtensionProjectNodeUIRule = new Guid(guidPackageReferenceVersionToAttributeExtensionProjectNodeUIRuleString);
+
+        public const string guidPackageReferenceVersionToAttributeExtensionSolutionNodeUIRuleString = "e56530ff-9e50-4309-b551-c273bd2aab84";
+        public static Guid guidPackageReferenceVersionToAttributeExtensionSolutionNodeUIRule = new Guid(guidPackageReferenceVersionToAttributeExtensionSolutionNodeUIRuleString);
     }
     /// <summary>
     /// Helper class that encapsulates all CommandIDs uses across VS Package.
     /// </summary>
     internal sealed partial class PackageIds
     {
-        public const int PackageReferenceVersionToAttributeMenuGroup = 0x0001;
-        public const int PackageReferenceVersionToAttributeCommand = 0x0100;
+        public const int ProjectNodeGroup = 0x0001;
+        public const int MultipleProjectNodesGroup = 0x0002;
+        public const int SolutionNodeGroup = 0x0003;
+        public const int PackageReferenceVersionToAttributeProjectNodeCommand = 0x0100;
+        public const int PackageReferenceVersionToAttributeMultipleProjectNodesCommand = 0x0101;
+        public const int PackageReferenceVersionToAttributeSolutionNodeCommand = 0x0102;
     }
 }

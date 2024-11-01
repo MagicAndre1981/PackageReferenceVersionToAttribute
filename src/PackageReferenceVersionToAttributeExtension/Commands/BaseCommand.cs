@@ -1,4 +1,4 @@
-﻿// <copyright file="ConvertPackageReferenceVersionElementsToAttributesCommand.cs" company="Rami Abughazaleh">
+﻿// <copyright file="BaseCommand.cs" company="Rami Abughazaleh">
 //   Copyright (c) Rami Abughazaleh. All rights reserved.
 // </copyright>
 
@@ -12,30 +12,29 @@ namespace PackageReferenceVersionToAttributeExtension
     using System.Xml;
     using System.Xml.Linq;
     using Community.VisualStudio.Toolkit;
-    using Community.VisualStudio.Toolkit.DependencyInjection;
-    using Community.VisualStudio.Toolkit.DependencyInjection.Core;
-    using EnvDTE;
     using Microsoft.VisualStudio.Shell;
     using PackageReferenceVersionToAttributeExtension.Services;
 
     /// <summary>
-    /// Convert PackageReference Version elements to attributes command.
+    /// Base command.
     /// </summary>
-    [Command(
-        PackageGuids.guidPackageReferenceVersionToAttributeExtensionCmdSetString,
-        PackageIds.PackageReferenceVersionToAttributeCommand)]
-    internal sealed class ConvertPackageReferenceVersionElementsToAttributesCommand(
-        DIToolkitPackage package,
+    internal class BaseCommand(
         LoggingService loggingService,
         ProjectService projectService,
-        FileSystemService fileSystemService) : BaseDICommand(package)
+        FileSystemService fileSystemService)
     {
         private readonly LoggingService loggingService = loggingService;
         private readonly ProjectService projectService = projectService;
         private readonly FileSystemService fileSystemService = fileSystemService;
 
-        /// <inheritdoc/>
-        protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)
+        /// <summary>
+        /// Converts all &lt;Version&gt; elements within &lt;PackageReference&gt; items in the project file
+        /// to attributes, ensuring that version information is consistently represented as an attribute.
+        /// This operation scans for &lt;PackageReference&gt; elements, identifies child &lt;Version&gt;
+        /// elements, and moves the version value to an attribute if found.
+        /// </summary>
+        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
+        internal async Task ConvertPackageReferenceVersionElementsToAttributesAsync()
         {
             try
             {
@@ -65,6 +64,36 @@ namespace PackageReferenceVersionToAttributeExtension
             {
                 await VS.StatusBar.EndAnimationAsync(StatusAnimation.General);
             }
+        }
+
+        /// <summary>
+        /// Retrieves the projects currently selected in Solution Explorer.
+        /// This method identifies selected project nodes, as well as projects under a solution node if it is selected.
+        /// </summary>
+        /// <returns>A collection of distinct projects selected in Solution Explorer.</returns>
+        internal async Task<IEnumerable<Project>> GetSelectedProjectsAsync()
+        {
+            // Get the active items from Solution Explorer
+            var activeItems = await VS.Solutions.GetActiveItemsAsync();
+
+            // A HashSet to ensure unique projects are returned
+            var projects = new HashSet<Project>();
+
+            foreach (var item in activeItems)
+            {
+                if (item is Solution solution)
+                {
+                    // Get all projects in the solution
+                    projects.UnionWith(this.GetAllProjects(solution.Children));
+                }
+                else if (item is Project project)
+                {
+                    // Directly add selected projects
+                    projects.Add(project);
+                }
+            }
+
+            return projects;
         }
 
         private async Task ConvertPackageReferenceVersionElementsToAttributesAsync(IEnumerable<Community.VisualStudio.Toolkit.Project> projects)
@@ -155,13 +184,34 @@ namespace PackageReferenceVersionToAttributeExtension
             }
         }
 
-        private async Task<IEnumerable<Community.VisualStudio.Toolkit.Project>> GetSelectedProjectsAsync()
+        private IEnumerable<Project> GetAllProjects(
+            IEnumerable<SolutionItem> items)
         {
-            // Get the active items from the Solution Explorer
-            var activeItems = await VS.Solutions.GetActiveItemsAsync();
+            var projects = new List<Project>();
 
-            // Get the selected items of type Project
-            return activeItems.OfType<Community.VisualStudio.Toolkit.Project>();
+            foreach (var item in items)
+            {
+                this.AddProjectsRecursively(item, projects);
+            }
+
+            return projects;
+        }
+
+        // Recursive method to gather projects from solution and solution folders
+        private void AddProjectsRecursively(SolutionItem solutionItem, List<Project> projects)
+        {
+            if (solutionItem is Project project)
+            {
+                projects.Add(project);
+            }
+            else if (solutionItem is SolutionFolder folder)
+            {
+                // Recursively add projects within each solution folder
+                foreach (var child in folder.Children)
+                {
+                    this.AddProjectsRecursively(child, projects);
+                }
+            }
         }
     }
 }
