@@ -13,7 +13,7 @@ namespace PackageReferenceVersionToAttributeExtensionTests.Mocks
     /// </summary>
     internal class MockOutputWindow : IVsOutputWindow, SVsOutputWindow
     {
-        private MockOutputWindowPane outputWindowPane;
+        private readonly MockOutputWindowPane outputWindowPane;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MockOutputWindow"/> class.

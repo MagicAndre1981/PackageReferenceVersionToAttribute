@@ -5,52 +5,69 @@
 namespace PackageReferenceVersionToAttributeExtensionTests.Mocks
 {
     using System;
+    using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
+    using PackageReferenceVersionToAttributeExtensionTests.Logging;
 
     /// <summary>
     /// Mock hierarchy item identity.
     /// </summary>
     internal class MockHierarchyItemIdentity : IVsHierarchyItemIdentity
     {
-        private readonly MockHierarchy hierarchy;
-        private MockProject nestedHierarchy;
-
         /// <summary>
         /// Initializes a new instance of the <see cref="MockHierarchyItemIdentity"/> class.
         /// </summary>
+        /// <param name="id">The identifier.</param>
         /// <param name="hierarchy">The hierarchy.</param>
-        public MockHierarchyItemIdentity(MockHierarchy hierarchy)
+        /// <param name="nestedHierarchy">The nested hierarchy.</param>
+        public MockHierarchyItemIdentity(uint id, IVsHierarchy hierarchy, IVsHierarchy nestedHierarchy = null)
         {
-            this.hierarchy = hierarchy;
+            this.ItemID = id;
+            this.Hierarchy = hierarchy;
+            this.NestedHierarchy = nestedHierarchy;
         }
 
         /// <inheritdoc/>
         public bool IsNestedItem => false;
 
         /// <inheritdoc/>
-        public IVsHierarchy Hierarchy => this.hierarchy;
+        public IVsHierarchy Hierarchy { get; set; }
 
         /// <inheritdoc/>
-        public uint ItemID => 0;
+        public uint ItemID { get; set; }
 
         /// <inheritdoc/>
-        public IVsHierarchy NestedHierarchy => this.nestedHierarchy;
+        public IVsHierarchy NestedHierarchy { get; set; }
 
         /// <inheritdoc/>
-        public uint NestedItemID => 4294967294u;
+        public uint NestedItemID => (uint)VSConstants.VSITEMID.Root;
 
         /// <inheritdoc/>
         public bool IsRoot => throw new NotImplementedException();
 
-        /// <summary>
-        /// Adds the item to the hierarchy.
-        /// </summary>
-        /// <param name="item">The item.</param>
-        internal void AddItem(MockProject item)
+        /// <inheritdoc/>
+        public override string ToString()
         {
-            this.hierarchy.AddItem(item);
-            this.nestedHierarchy = item;
+            return this.ToString(1);
+        }
+
+        /// <summary>
+        /// Returns a string representation of this object, formatted with indentation based on the specified level.
+        /// </summary>
+        /// <param name="indentLevel">The level of indentation to apply to the output string. Defaults to 1.</param>
+        /// <returns>A formatted string representing this object.</returns>
+        internal string ToString(int indentLevel = 1)
+        {
+            string indent = new(' ', indentLevel * 4);
+
+            return $"""
+                {nameof(MockHierarchyItemIdentity)}:
+                    {indent}ItemId: {ItemIdFormatter.Format(this.ItemID)},
+                    {indent}Hierarchy: {(this.Hierarchy as MockHierarchy).ToString(indentLevel + 1)},
+                    {indent}NestedItemID: {ItemIdFormatter.Format(this.NestedItemID)},
+                    {indent}NestedHierarchy: {(this.NestedHierarchy as MockHierarchy).ToString(indentLevel + 1)}
+                """;
         }
     }
 }

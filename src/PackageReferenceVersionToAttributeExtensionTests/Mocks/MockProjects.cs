@@ -14,7 +14,7 @@ namespace PackageReferenceVersionToAttributeExtensionTests.Mocks
     /// </summary>
     internal class MockProjects : Projects, IEnumerable<Project>
     {
-        private List<Project> projects = new List<Project>();
+        private readonly List<Project> projects = new();
 
         /// <inheritdoc/>
         public DTE Parent => throw new NotImplementedException();

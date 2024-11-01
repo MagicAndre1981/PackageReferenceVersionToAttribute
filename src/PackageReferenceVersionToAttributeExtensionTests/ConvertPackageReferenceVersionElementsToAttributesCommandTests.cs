@@ -4,8 +4,10 @@
 
 namespace PackageReferenceVersionToAttributeExtensionTests
 {
+    using System;
     using System.ComponentModel.Design;
     using System.Threading.Tasks;
+    using Microsoft.Extensions.Logging;
     using Microsoft.VisualStudio.Sdk.TestFramework;
     using Microsoft.VisualStudio.Shell;
     using Microsoft.VisualStudio.Shell.Interop;
@@ -13,8 +15,10 @@ namespace PackageReferenceVersionToAttributeExtensionTests
     using Moq;
     using PackageReferenceVersionToAttributeExtension;
     using PackageReferenceVersionToAttributeExtensionTests.Mocks;
+    using PackageReferenceVersionToAttributeExtensionTests.Setup;
     using IAsyncServiceProvider = Microsoft.VisualStudio.Shell.Interop.COMAsyncServiceProvider.IAsyncServiceProvider;
     using OleServiceProvider = Microsoft.VisualStudio.OLE.Interop.IServiceProvider;
+    using ServiceProvider = Microsoft.VisualStudio.Shell.ServiceProvider;
 
     /// <summary>
     /// Convert PackageReference version elements to attributes command tests.
@@ -25,6 +29,8 @@ namespace PackageReferenceVersionToAttributeExtensionTests
         private PackageReferenceVersionToAttributeExtensionPackage package;
         private MenuCommand command;
         private MockVisualStudio mockVisualStudio;
+        private DisposableServiceProvider serviceProvider;
+        private ILoggerFactory loggerFactory;
 
         /// <summary>
         /// Gets the mock service provider.
@@ -37,8 +43,11 @@ namespace PackageReferenceVersionToAttributeExtensionTests
         /// </summary>
         /// <param name="context">Provides information about and functionality for the test run context.</param>
         [AssemblyInitialize]
+#pragma warning disable IDE0060 // Remove unused parameter; context is required by the MSTest framework
         public static void AssemblyInitialize(TestContext context)
+#pragma warning restore IDE0060 // Remove unused parameter
         {
+            MockServiceProvider?.Dispose();
             MockServiceProvider = new GlobalServiceProvider();
         }
 
@@ -53,15 +62,15 @@ namespace PackageReferenceVersionToAttributeExtensionTests
         }
 
         /// <summary>
-        /// Initializes resources or configurations needed before each test runs.
-        /// This method is executed once before every individual test in the class.
+        /// Runs before each test.
         /// </summary>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
         [TestInitialize]
-        public async Task InitializeAsync()
+        public async Task TestInitializeAsync()
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
             MockServiceProvider.Reset();
+            this.serviceProvider = ServiceProviderFactory.CreateServiceProvider();
 
             this.package = new PackageReferenceVersionToAttributeExtensionPackage();
 
@@ -77,12 +86,27 @@ namespace PackageReferenceVersionToAttributeExtensionTests
                 mockPromotedServices.Object,
                 mockPromotedServices.Object.GetServiceProgressCallback());
 
-            this.mockVisualStudio = new MockVisualStudio(MockServiceProvider);
+            this.mockVisualStudio = new MockVisualStudio(MockServiceProvider, this.serviceProvider);
 
             IMenuCommandService commandService = (IMenuCommandService)await this.package.GetServiceAsync(typeof(IMenuCommandService));
+            Assert.IsNotNull(commandService);
+
             this.command = commandService.FindCommand(new CommandID(
                 PackageGuids.guidPackageReferenceVersionToAttributeExtensionCmdSet,
                 PackageIds.PackageReferenceVersionToAttributeCommand));
+            Assert.IsNotNull(this.command);
+
+            this.loggerFactory = this.serviceProvider.GetService<ILoggerFactory>();
+        }
+
+        /// <summary>
+        /// Runs after each test method.
+        /// </summary>
+        [TestCleanup]
+        public void TestCleanup()
+        {
+            this.mockVisualStudio.Dispose();
+            (this.serviceProvider as IDisposable)?.Dispose();
         }
 
         /// <summary>
@@ -111,23 +135,24 @@ namespace PackageReferenceVersionToAttributeExtensionTests
             // Arrange
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            // create the project file
-            const string Contents = """
-                <Project Sdk="Microsoft.NET.Sdk">
-                    <PropertyGroup>
-                        <TargetFramework>net8.0</TargetFramework>
-                    </PropertyGroup>
-                    <ItemGroup>
-                        <PackageReference Include="PackageA">
-                            <Version>1.2.3</Version>
-                        </PackageReference>
-                    </ItemGroup>
-                </Project>
-                """;
-
-            MockProject project = new MockProject(Contents);
-            this.mockVisualStudio.AddProject(project);
-            this.mockVisualStudio.AddSelection(project);
+            using MockProject project = new(this.loggerFactory)
+            {
+                Name = "ProjectA",
+                Contents = """
+                    <Project Sdk="Microsoft.NET.Sdk">
+                        <PropertyGroup>
+                            <TargetFramework>net8.0</TargetFramework>
+                        </PropertyGroup>
+                        <ItemGroup>
+                            <PackageReference Include="PackageA">
+                                <Version>1.2.3</Version>
+                            </PackageReference>
+                        </ItemGroup>
+                    </Project>
+                    """,
+            };
+            this.mockVisualStudio.AddProjects(project);
+            this.mockVisualStudio.AddSelections(project);
 
             // Act
             this.command.Invoke(null);
@@ -144,7 +169,7 @@ namespace PackageReferenceVersionToAttributeExtensionTests
                     </ItemGroup>
                 </Project>
                 """,
-                project.ReadFile());
+                project.Contents);
         }
 
         /// <summary>
@@ -159,26 +184,27 @@ namespace PackageReferenceVersionToAttributeExtensionTests
             // Arrange
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            // create the project file
-            const string Contents = """
-                <Project Sdk="Microsoft.NET.Sdk">
-                    <PropertyGroup>
-                        <TargetFramework>net8.0</TargetFramework>
-                    </PropertyGroup>
-                    <ItemGroup>
-                        <PackageReference Include="PackageA">
-                          <Version>1.2.3</Version>
-                          <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
-                          <PrivateAssets>all</PrivateAssets>
-                        </PackageReference>
-                        <PackageReference Include="PackageB" Version="4.5.6" />
-                    </ItemGroup>
-                </Project>
-                """;
-
-            MockProject project = new MockProject(Contents);
-            this.mockVisualStudio.AddProject(project);
-            this.mockVisualStudio.AddSelection(project);
+            using MockProject project = new(this.loggerFactory)
+            {
+                Name = "ProjectA",
+                Contents = """
+                    <Project Sdk="Microsoft.NET.Sdk">
+                        <PropertyGroup>
+                            <TargetFramework>net8.0</TargetFramework>
+                        </PropertyGroup>
+                        <ItemGroup>
+                            <PackageReference Include="PackageA">
+                              <Version>1.2.3</Version>
+                              <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+                              <PrivateAssets>all</PrivateAssets>
+                            </PackageReference>
+                            <PackageReference Include="PackageB" Version="4.5.6" />
+                        </ItemGroup>
+                    </Project>
+                    """,
+            };
+            this.mockVisualStudio.AddProjects(project);
+            this.mockVisualStudio.AddSelections(project);
 
             // Act
             this.command.Invoke(null);
@@ -200,7 +226,7 @@ namespace PackageReferenceVersionToAttributeExtensionTests
                     </ItemGroup>
                 </Project>
                 """,
-                project.ReadFile());
+                project.Contents);
         }
 
         /// <summary>
@@ -215,34 +241,35 @@ namespace PackageReferenceVersionToAttributeExtensionTests
             // Arrange
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
-            // create the project file
-            const string Contents = """
-                <Project Sdk="Microsoft.NET.Sdk">
-                    <PropertyGroup>
-                        <TargetFramework>net6.0;net8.0</TargetFramework>
-                    </PropertyGroup>
-                    <Choose>
-                        <When Condition="'$(TargetFramework)'=='net6.0'">
-                        <ItemGroup>
-                            <PackageReference Include="PackageA">
-                                <Version>1.2.3</Version>
-                            </PackageReference>
-                        </ItemGroup>
-                        </When>
-                        <When Condition="'$(TargetFramework)'=='net8.0'">
-                        <ItemGroup>
-                            <PackageReference Include="PackageB">
-                                <Version>4.5.6</Version>
-                            </PackageReference>
-                        </ItemGroup>
-                        </When>
-                    </Choose>
-                </Project>
-                """;
-
-            MockProject project = new MockProject(Contents);
-            this.mockVisualStudio.AddProject(project);
-            this.mockVisualStudio.AddSelection(project);
+            using MockProject project = new(this.loggerFactory)
+            {
+                Name = "ProjectA",
+                Contents = """
+                    <Project Sdk="Microsoft.NET.Sdk">
+                        <PropertyGroup>
+                            <TargetFramework>net6.0;net8.0</TargetFramework>
+                        </PropertyGroup>
+                        <Choose>
+                            <When Condition="'$(TargetFramework)'=='net6.0'">
+                            <ItemGroup>
+                                <PackageReference Include="PackageA">
+                                    <Version>1.2.3</Version>
+                                </PackageReference>
+                            </ItemGroup>
+                            </When>
+                            <When Condition="'$(TargetFramework)'=='net8.0'">
+                            <ItemGroup>
+                                <PackageReference Include="PackageB">
+                                    <Version>4.5.6</Version>
+                                </PackageReference>
+                            </ItemGroup>
+                            </When>
+                        </Choose>
+                    </Project>
+                    """,
+            };
+            this.mockVisualStudio.AddProjects(project);
+            this.mockVisualStudio.AddSelections(project);
 
             // Act
             this.command.Invoke(null);
@@ -268,7 +295,87 @@ namespace PackageReferenceVersionToAttributeExtensionTests
                     </Choose>
                 </Project>
                 """,
-                project.ReadFile());
+                project.Contents);
+        }
+
+        /// <summary>
+        /// Verifies that the <c>ExecuteAsync</c> method completes successfully
+        /// when two projects are selected in the solution.
+        /// </summary>
+        /// <returns>A task representing the asynchronous test operation.</returns>
+        [TestMethod]
+        public async Task ExecuteAsync_WithTwoSelectedProjects_SucceedsAsync()
+        {
+            // Arrange
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            using MockProject project1 = new(this.loggerFactory)
+            {
+                Id = 1,
+                Name = "ProjectA",
+                Contents = """
+                    <Project Sdk="Microsoft.NET.Sdk">
+                        <PropertyGroup>
+                            <TargetFramework>net8.0</TargetFramework>
+                        </PropertyGroup>
+                        <ItemGroup>
+                            <PackageReference Include="PackageA">
+                                <Version>1.2.3</Version>
+                            </PackageReference>
+                        </ItemGroup>
+                    </Project>
+                    """,
+            };
+
+            using MockProject project2 = new(this.loggerFactory)
+            {
+                Id = 2,
+                Name = "ProjectB",
+                Contents = """
+                    <Project Sdk="Microsoft.NET.Sdk">
+                        <PropertyGroup>
+                            <TargetFramework>net8.0</TargetFramework>
+                        </PropertyGroup>
+                        <ItemGroup>
+                            <PackageReference Include="PackageA">
+                                <Version>1.2.3</Version>
+                            </PackageReference>
+                        </ItemGroup>
+                    </Project>
+                    """,
+            };
+
+            this.mockVisualStudio.AddProjects(project1, project2);
+            this.mockVisualStudio.AddSelections(project1, project2);
+
+            // Act
+            this.command.Invoke(null);
+
+            // Assert
+            Assert.AreEqual(
+                """
+                <Project Sdk="Microsoft.NET.Sdk">
+                    <PropertyGroup>
+                        <TargetFramework>net8.0</TargetFramework>
+                    </PropertyGroup>
+                    <ItemGroup>
+                        <PackageReference Include="PackageA" Version="1.2.3" />
+                    </ItemGroup>
+                </Project>
+                """,
+                project1.Contents);
+            Assert.AreEqual(
+                """
+                <Project Sdk="Microsoft.NET.Sdk">
+                    <PropertyGroup>
+                        <TargetFramework>net8.0</TargetFramework>
+                    </PropertyGroup>
+                    <ItemGroup>
+                        <PackageReference Include="PackageA" Version="1.2.3" />
+                    </ItemGroup>
+                </Project>
+                """,
+                project2.Contents);
         }
     }
 }

@@ -62,13 +62,11 @@ namespace PackageReferenceVersionToAttributeExtensionTests
             {
                 if (disposing)
                 {
-                    // Release managed resources if necessary
-                }
-
-                // Delete the temporary file
-                if (File.Exists(this.FilePath))
-                {
-                    File.Delete(this.FilePath);
+                    // Delete the temporary file
+                    if (File.Exists(this.FilePath))
+                    {
+                        File.Delete(this.FilePath);
+                    }
                 }
 
                 this.disposed = true;

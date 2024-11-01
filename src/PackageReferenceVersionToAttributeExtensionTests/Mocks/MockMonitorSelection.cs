@@ -6,8 +6,10 @@ namespace PackageReferenceVersionToAttributeExtensionTests.Mocks
 {
     using System;
     using System.Runtime.InteropServices;
+    using Microsoft.Extensions.Logging;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell.Interop;
+    using PackageReferenceVersionToAttributeExtensionTests.Logging;
 
     /// <summary>
     /// Mock monitor selection.
@@ -16,14 +18,20 @@ namespace PackageReferenceVersionToAttributeExtensionTests.Mocks
     {
         private readonly MockMultiItemSelect multiItemSelect;
         private readonly MockHierarchy hierarchy;
+        private readonly ILogger<MockMonitorSelection> logger;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="MockMonitorSelection"/> class.
         /// </summary>
+        /// <param name="logger">The logger.</param>
         /// <param name="multiItemSelect">The multi-item select.</param>
         /// <param name="hierarchy">The hierarchy.</param>
-        public MockMonitorSelection(MockMultiItemSelect multiItemSelect, MockHierarchy hierarchy)
+        public MockMonitorSelection(
+            ILogger<MockMonitorSelection> logger,
+            MockMultiItemSelect multiItemSelect,
+            MockHierarchy hierarchy)
         {
+            this.logger = logger;
             this.multiItemSelect = multiItemSelect;
             this.hierarchy = hierarchy;
         }
@@ -51,6 +59,15 @@ namespace PackageReferenceVersionToAttributeExtensionTests.Mocks
                 ppHier = IntPtr.Zero;
                 pitemid = 0;
             }
+
+            this.logger.LogDebug(
+                $"""
+                GetCurrentSelection called:
+                    ppHier = {ppHier}
+                    pitemid = {ItemIdFormatter.Format(pitemid)}
+                    ppMIS = {this.multiItemSelect.ToString(1)}
+                    ppSC = {ppSC}
+                """);
 
             return VSConstants.S_OK;
         }

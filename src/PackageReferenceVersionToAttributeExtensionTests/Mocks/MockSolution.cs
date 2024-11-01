@@ -11,7 +11,7 @@ namespace PackageReferenceVersionToAttributeExtensionTests.Mocks
     /// <summary>
     /// Mock solution.
     /// </summary>
-    internal class MockSolution : IVsSolution
+    internal class MockSolution : IVsSolution, IVsHierarchy
     {
         /// <inheritdoc/>
         public int GetProjectEnum(uint grfEnumFlags, ref Guid rguidEnumOnlyThisType, out IEnumHierarchies ppenum)
@@ -226,6 +226,114 @@ namespace PackageReferenceVersionToAttributeExtensionTests.Mocks
 
         /// <inheritdoc/>
         public int CanCreateNewProjectAtLocation(int fCreateNewSolution, string pszFullProjectFilePath, out int pfCanCreate)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public int SetSite(Microsoft.VisualStudio.OLE.Interop.IServiceProvider psp)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public int GetSite(out Microsoft.VisualStudio.OLE.Interop.IServiceProvider ppSP)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public int QueryClose(out int pfCanClose)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public int Close()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public int GetGuidProperty(uint itemid, int propid, out Guid pguid)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public int SetGuidProperty(uint itemid, int propid, ref Guid rguid)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public int GetProperty(uint itemid, int propid, out object pvar)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public int SetProperty(uint itemid, int propid, object var)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public int GetNestedHierarchy(uint itemid, ref Guid iidHierarchyNested, out IntPtr ppHierarchyNested, out uint pitemidNested)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public int GetCanonicalName(uint itemid, out string pbstrName)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public int ParseCanonicalName(string pszName, out uint pitemid)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public int Unused0()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public int AdviseHierarchyEvents(IVsHierarchyEvents pEventSink, out uint pdwCookie)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public int UnadviseHierarchyEvents(uint dwCookie)
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public int Unused1()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public int Unused2()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public int Unused3()
+        {
+            throw new NotImplementedException();
+        }
+
+        /// <inheritdoc/>
+        public int Unused4()
         {
             throw new NotImplementedException();
         }

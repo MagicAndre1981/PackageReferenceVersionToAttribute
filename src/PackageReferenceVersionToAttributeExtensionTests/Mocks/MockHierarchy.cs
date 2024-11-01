@@ -5,8 +5,8 @@
 namespace PackageReferenceVersionToAttributeExtensionTests.Mocks
 {
     using System;
-    using System.Collections.Generic;
-    using System.Linq;
+    using System.IO;
+    using Microsoft.Extensions.Logging;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell.Interop;
 
@@ -15,7 +15,26 @@ namespace PackageReferenceVersionToAttributeExtensionTests.Mocks
     /// </summary>
     internal class MockHierarchy : IVsHierarchy
     {
-        private List<MockProject> items = new List<MockProject>();
+        private readonly ILogger<MockHierarchy> logger;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="MockHierarchy"/> class.
+        /// </summary>
+        /// <param name="logger">The logger.</param>
+        public MockHierarchy(ILogger<MockHierarchy> logger)
+        {
+            this.logger = logger;
+        }
+
+        /// <summary>
+        /// Gets or sets the identifier.
+        /// </summary>
+        public uint Id { get; internal set; }
+
+        /// <summary>
+        /// Gets or sets the name.
+        /// </summary>
+        public string Name { get; internal set; }
 
         /// <inheritdoc/>
         public int SetSite(Microsoft.VisualStudio.OLE.Interop.IServiceProvider psp)
@@ -74,7 +93,14 @@ namespace PackageReferenceVersionToAttributeExtensionTests.Mocks
         /// <inheritdoc/>
         public int GetCanonicalName(uint itemid, out string pbstrName)
         {
-            pbstrName = this.items.Single().Name;
+            pbstrName = this.Name;
+
+            this.logger.LogDebug(
+                $"""
+                GetCanonicalName called with:
+                    itemid: {itemid}.
+                  Resulting name: {Path.GetFileNameWithoutExtension(pbstrName)}
+                """);
 
             return VSConstants.S_OK;
         }
@@ -127,13 +153,26 @@ namespace PackageReferenceVersionToAttributeExtensionTests.Mocks
             throw new NotImplementedException();
         }
 
-        /// <summary>
-        /// Adds the item to the hierarchy.
-        /// </summary>
-        /// <param name="item">The item.</param>
-        internal void AddItem(MockProject item)
+        /// <inheritdoc/>
+        public override string ToString()
         {
-            this.items.Add(item);
+            return this.ToString(1);
+        }
+
+        /// <summary>
+        /// Returns a string representation of this object, formatted with indentation based on the specified level.
+        /// </summary>
+        /// <param name="indentLevel">The level of indentation to apply to the output string. Defaults to 1.</param>
+        /// <returns>A formatted string representing this object.</returns>
+        internal string ToString(int indentLevel = 1)
+        {
+            string indent = new(' ', indentLevel * 4);
+
+            return $"""
+                {nameof(MockHierarchy)}:
+                    {indent}Id: {this.Id}
+                    {indent}Name: {this.Name}
+                """;
         }
     }
 }
