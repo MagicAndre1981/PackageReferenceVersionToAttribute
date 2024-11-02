@@ -96,10 +96,6 @@
         <VisibilityItem guid="guidPackageReferenceVersionToAttributeExtensionCmdSet"
                         id="PackageReferenceVersionToAttributeProjectNodeCommand"
                         context="guidPackageReferenceVersionToAttributeExtensionProjectNodeUIRule" />
-        <!--<VisibilityItem guid="guidPackageReferenceVersionToAttributeExtensionCmdSet"
-                        id="PackageReferenceVersionToAttributeMultipleProjectNodesCommand"
-                        context="guidPackageReferenceVersionToAttributeExtensionMultipleProjectNodesUIRule" />-->
-        
         <VisibilityItem guid="guidPackageReferenceVersionToAttributeExtensionCmdSet"
                         id="PackageReferenceVersionToAttributeSolutionNodeCommand"
                         context="guidPackageReferenceVersionToAttributeExtensionSolutionNodeUIRule" />
@@ -125,8 +121,6 @@
         </GuidSymbol>
         <GuidSymbol name="guidPackageReferenceVersionToAttributeExtensionProjectNodeUIRule"
                     value="{e309983d-aa3b-4faa-a8db-96923c2c0d90}" />
-        <!--<GuidSymbol name="guidPackageReferenceVersionToAttributeExtensionMultipleProjectNodesUIRule"
-                    value="{584a1a02-0a44-49f6-b05d-723e6b18c5a5}" />-->
         <GuidSymbol name="guidPackageReferenceVersionToAttributeExtensionSolutionNodeUIRule"
                     value="{e56530ff-9e50-4309-b551-c273bd2aab84}" />
     </Symbols>
