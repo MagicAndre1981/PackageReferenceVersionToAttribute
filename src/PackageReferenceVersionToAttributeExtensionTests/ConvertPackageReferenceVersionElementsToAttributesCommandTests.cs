@@ -371,6 +371,51 @@ namespace PackageReferenceVersionToAttributeExtensionTests
         }
 
         /// <summary>
+        /// Verifies that the <c>ExecuteAsync</c> method
+        /// when one project is selected in the solution, which contains an XML declaration,
+        /// preserves the XML declaration.
+        /// </summary>
+        /// <returns>A task representing the asynchronous test operation.</returns>
+        [TestMethod]
+        public async Task ExecuteAsync_WithOneSelectedProjectWithAnXmlDeclaration_PreservesTheXmlDeclaration_Async()
+        {
+            // Arrange
+            await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
+
+            using MockProject project = new(this.loggerFactory)
+            {
+                Name = "ProjectA",
+                Contents = """
+                    <?xml version="1.0" encoding="utf-8"?>
+                    <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+                      <ItemGroup>
+                        <PackageReference Include="PackageA">
+                          <Version>1.2.3</Version>
+                        </PackageReference>
+                      </ItemGroup>
+                    </Project>
+                    """,
+            };
+            this.mockVisualStudio.AddProjects(project);
+            this.mockVisualStudio.AddSelections(project);
+
+            // Act
+            this.command.Invoke(null);
+
+            // Assert
+            Assert.AreEqual(
+                """
+                <?xml version="1.0" encoding="utf-8"?>
+                <Project ToolsVersion="14.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+                  <ItemGroup>
+                    <PackageReference Include="PackageA" Version="1.2.3" />
+                  </ItemGroup>
+                </Project>
+                """,
+                project.Contents);
+        }
+
+        /// <summary>
         /// Verifies that the <c>ExecuteAsync</c> method completes successfully
         /// when two projects are selected in the solution.
         /// </summary>

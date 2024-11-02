@@ -167,8 +167,8 @@ namespace PackageReferenceVersionToAttributeExtension
                     {
                         var settings = new XmlWriterSettings
                         {
-                            OmitXmlDeclaration = true,
-                            Indent = false, // Prevents adding any extra indentation
+                            OmitXmlDeclaration = document.Declaration == null, // Preserve the XML declaration if it exists.
+                            Indent = false,                                    // Prevents adding any extra indentation
                             NewLineHandling = NewLineHandling.Replace,
                         };
 
