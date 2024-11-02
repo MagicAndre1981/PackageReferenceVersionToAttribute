@@ -6,6 +6,7 @@ namespace PackageReferenceVersionToAttributeExtensionTests
 {
     using System;
     using System.ComponentModel.Design;
+    using System.IO;
     using System.Threading.Tasks;
     using Microsoft.Extensions.Logging;
     using Microsoft.VisualStudio.Sdk.TestFramework;
@@ -136,21 +137,22 @@ namespace PackageReferenceVersionToAttributeExtensionTests
             // Arrange
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
+            const string Contents = """
+                <Project Sdk="Microsoft.NET.Sdk">
+                    <PropertyGroup>
+                        <TargetFramework>net8.0</TargetFramework>
+                    </PropertyGroup>
+                    <ItemGroup>
+                        <PackageReference Include="PackageA">
+                            <Version>1.2.3</Version>
+                        </PackageReference>
+                    </ItemGroup>
+                </Project>
+                """;
             using MockProject project = new(this.loggerFactory)
             {
                 Name = "ProjectA",
-                Contents = """
-                    <Project Sdk="Microsoft.NET.Sdk">
-                        <PropertyGroup>
-                            <TargetFramework>net8.0</TargetFramework>
-                        </PropertyGroup>
-                        <ItemGroup>
-                            <PackageReference Include="PackageA">
-                                <Version>1.2.3</Version>
-                            </PackageReference>
-                        </ItemGroup>
-                    </Project>
-                    """,
+                Contents = Contents,
             };
             this.mockVisualStudio.AddProjects(project);
             this.mockVisualStudio.AddSelections(project);
@@ -171,6 +173,10 @@ namespace PackageReferenceVersionToAttributeExtensionTests
                 </Project>
                 """,
                 project.Contents);
+
+            string backupFilePath = $"{project.Path}.bak";
+            Assert.IsTrue(File.Exists(backupFilePath));
+            Assert.AreEqual(Contents, File.ReadAllText(backupFilePath));
         }
 
         /// <summary>

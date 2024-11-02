@@ -1,4 +1,4 @@
-// <copyright file="ToolTests.cs" company="Rami Abughazaleh">
+// <copyright file="InputTests.cs" company="Rami Abughazaleh">
 //   Copyright (c) Rami Abughazaleh. All rights reserved.
 // </copyright>
 
@@ -11,10 +11,10 @@ namespace PackageReferenceVersionToAttributeToolTests
     using static PackageReferenceVersionToAttributeToolTests.ToolRunner.ToolRunner;
 
     /// <summary>
-    /// Contains unit tests for verifying the functionality of the tool.
+    /// Contains unit tests for verifying the expected behavior for the inputs parameter of the tool.
     /// </summary>
     [TestClass]
-    public class ToolTests
+    public class InputTests
     {
         /// <summary>
         /// Verifies that a call to <see cref="Program.Main"/>
@@ -41,6 +41,7 @@ namespace PackageReferenceVersionToAttributeToolTests
                   <inputs>  The project files or wildcard patterns to convert.
 
                 Options:
+                  -b, --backup    Create a backup of the project files.
                   -f, --force     Force conversion even if already configured.
                   -d, --dry-run   Preview changes without making any modifications.
                   --version       Show version information
@@ -98,11 +99,7 @@ namespace PackageReferenceVersionToAttributeToolTests
                 """,
                 result.Output.Trim(),
                 result.OutputAndError);
-            Assert.AreEqual(
-                """
-                
-                """,
-                result.Error.Trim());
+            Assert.AreEqual(string.Empty, result.Error.Trim());
 
             Assert.AreEqual(
                 """
@@ -186,11 +183,7 @@ namespace PackageReferenceVersionToAttributeToolTests
                 """,
                 result.Output.Trim(),
                 result.OutputAndError);
-            Assert.AreEqual(
-                """
-                
-                """,
-                result.Error.Trim());
+            Assert.AreEqual(string.Empty, result.Error.Trim());
 
             Assert.AreEqual(
                 """
@@ -287,11 +280,7 @@ namespace PackageReferenceVersionToAttributeToolTests
                 """,
                 result.Output.Trim(),
                 result.OutputAndError);
-            Assert.AreEqual(
-                """
-                
-                """,
-                result.Error.Trim());
+            Assert.AreEqual(string.Empty, result.Error.Trim());
 
             Assert.AreEqual(
                 """

@@ -14,6 +14,7 @@ namespace PackageReferenceVersionToAttributeExtension
     using EnvDTE80;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell;
     using PackageReferenceVersionToAttribute;
@@ -49,25 +50,30 @@ namespace PackageReferenceVersionToAttributeExtension
         {
             base.InitializeServices(services);
 
-            // register services
-            services.AddSingleton<IFileService, FileSystemService>();
-            services.AddSingleton<ISourceControlService, ProjectService>();
-
-            services.AddSingleton((serviceProvider)
-                => VS.GetRequiredService<DTE, DTE2>());
-
-            services.AddSingleton<BaseCommand>();
-            services.AddSingleton<ProjectService>();
-            services.AddSingleton<ProjectConverter>();
-            services.AddLogging(configure =>
+            var options = new ProjectConverterOptions
             {
-                configure.ClearProviders();
-                configure.Services.AddSingleton<ILoggerProvider, CustomLoggerProvider>();
-                configure.SetMinimumLevel(LogLevel.Trace);
-            });
+                Backup = true,
+                Force = true,
+            };
 
-            // register commands
-            services.RegisterCommands(ServiceLifetime.Singleton, Assembly.GetExecutingAssembly());
+            // register services
+            services.AddSingleton(Options.Create(options))
+                .AddSingleton<IFileService, FileService>()
+                .AddSingleton<ISourceControlService, ProjectService>()
+                .AddSingleton((serviceProvider)
+                    => VS.GetRequiredService<DTE, DTE2>())
+                .AddSingleton<BaseCommand>()
+                .AddSingleton<ProjectService>()
+                .AddSingleton<ProjectConverter>()
+                .AddLogging(configure =>
+                {
+                    configure.ClearProviders();
+                    configure.Services.AddSingleton<ILoggerProvider, CustomLoggerProvider>();
+                    configure.SetMinimumLevel(LogLevel.Trace);
+                })
+
+                // register commands
+                .RegisterCommands(ServiceLifetime.Singleton, Assembly.GetExecutingAssembly());
         }
 
         /// <inheritdoc/>

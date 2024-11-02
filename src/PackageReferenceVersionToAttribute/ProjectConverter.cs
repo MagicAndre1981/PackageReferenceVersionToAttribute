@@ -12,6 +12,7 @@ namespace PackageReferenceVersionToAttribute
     using System.Xml;
     using System.Xml.Linq;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
 
     /// <summary>
     /// Provides functionality to convert project files, modifying elements and attributes as required.
@@ -21,6 +22,7 @@ namespace PackageReferenceVersionToAttribute
         private readonly ILogger<ProjectConverter> logger;
         private readonly IFileService fileService;
         private readonly ISourceControlService sourceControlService;
+        private readonly ProjectConverterOptions options;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="ProjectConverter"/> class.
@@ -28,14 +30,17 @@ namespace PackageReferenceVersionToAttribute
         /// <param name="logger">The logger used to log information and errors during the conversion process.</param>
         /// <param name="fileService">Service for file operations, such as backing up and modifying file attributes.</param>
         /// <param name="sourceControlService">Service for source control operations, such as checking out files.</param>
+        /// <param name="options">The options.</param>
         public ProjectConverter(
             ILogger<ProjectConverter> logger,
             IFileService fileService,
-            ISourceControlService sourceControlService)
+            ISourceControlService sourceControlService,
+            IOptions<ProjectConverterOptions> options)
         {
             this.logger = logger;
             this.fileService = fileService;
             this.sourceControlService = sourceControlService;
+            this.options = options.Value;
         }
 
         /// <summary>
@@ -80,11 +85,19 @@ namespace PackageReferenceVersionToAttribute
 
                     bool modified = false;
 
-                    // backup project file
-                    this.fileService.BackupFile(projectFilePath);
+                    if (this.options.Backup)
+                    {
+                        // backup project file
+                        this.fileService.BackupFile(projectFilePath);
+                    }
 
                     // check out file from source control
                     await this.sourceControlService.CheckOutFileAsync(projectFilePath);
+
+                    if (this.options.Force)
+                    {
+                        this.fileService.RemoveReadOnlyAttribute(projectFilePath);
+                    }
 
                     foreach (var packageReference in packageReferences)
                     {
@@ -117,9 +130,21 @@ namespace PackageReferenceVersionToAttribute
                             NewLineHandling = NewLineHandling.Replace,
                         };
 
-                        using var writer = XmlWriter.Create(projectFilePath, settings);
+                        if (this.options.DryRun)
+                        {
+                            // Output the modified document to the console for review
+                            using var stringWriter = new StringWriter();
+                            using var xmlWriter = XmlWriter.Create(stringWriter, settings);
 
-                        document.Save(writer); // Preserves original formatting, avoids extra lines
+                            document.WriteTo(xmlWriter);
+                            xmlWriter.Flush();
+                            this.logger.LogInformation(stringWriter.ToString());
+                        }
+                        else
+                        {
+                            using var writer = XmlWriter.Create(projectFilePath, settings);
+                            document.Save(writer); // Preserves original formatting, avoids extra lines
+                        }
                     }
                 }
                 catch (Exception ex)

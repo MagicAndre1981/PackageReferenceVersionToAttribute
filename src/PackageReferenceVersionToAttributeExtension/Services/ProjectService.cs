@@ -55,8 +55,6 @@ namespace PackageReferenceVersionToAttributeExtension.Services
 
                 this.dte.SourceControl.CheckOutItem(filePath);
             }
-
-            this.fileService.RemoveReadOnlyAttribute(filePath);
         }
     }
 }

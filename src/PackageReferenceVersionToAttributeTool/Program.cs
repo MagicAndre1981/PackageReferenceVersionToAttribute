@@ -9,6 +9,7 @@ namespace PackageReferenceVersionToAttributeTool
     using System.CommandLine.NamingConventionBinder;
     using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
+    using Microsoft.Extensions.Options;
     using PackageReferenceVersionToAttribute;
 
     /// <summary>
@@ -33,6 +34,10 @@ namespace PackageReferenceVersionToAttributeTool
                 Arity = ArgumentArity.OneOrMore,
             };
 
+            var backupOption = new Option<bool>(
+                aliases: ["--backup", "-b"],
+                description: "Create a backup of the project files.");
+
             var forceOption = new Option<bool>(
                 aliases: ["--force", "-f"],
                 description: "Force conversion even if already configured.");
@@ -44,17 +49,26 @@ namespace PackageReferenceVersionToAttributeTool
             var rootCommand = new RootCommand
             {
                 pathArgument,
+                backupOption,
                 forceOption,
                 dryRunOption,
             };
 
             // Set the handler for the command
             rootCommand.Handler = CommandHandler.Create(
-                async (string[] inputs, bool force, bool dryRun) =>
+                async (string[] inputs, bool backup, bool force, bool dryRun) =>
                 {
+                    // Bind command line arguments
+                    var options = new ProjectConverterOptions
+                    {
+                        Backup = backup,
+                        Force = force,
+                        DryRun = dryRun,
+                    };
+
                     foreach (var input in inputs)
                     {
-                        await ConvertPackageReferencesAsync(input, force, dryRun);
+                        await ConvertPackageReferencesAsync(input, options);
                     }
                 });
 
@@ -62,7 +76,8 @@ namespace PackageReferenceVersionToAttributeTool
             return await rootCommand.InvokeAsync(args);
         }
 
-        private static async Task ConvertPackageReferencesAsync(string input, bool force, bool dryRun)
+        private static async Task ConvertPackageReferencesAsync(
+            string input, ProjectConverterOptions options)
         {
             FilePatternMatcher filePatternMatcher = new();
             List<string> matchingFiles = filePatternMatcher.GetMatchingFiles(input);
@@ -72,20 +87,26 @@ namespace PackageReferenceVersionToAttributeTool
                 return;
             }
 
-            if (force)
+            if (options.Backup)
+            {
+                Console.WriteLine("Backup option is enabled.");
+            }
+
+            if (options.Force)
             {
                 Console.WriteLine("Force option is enabled.");
             }
 
-            if (dryRun)
+            if (options.DryRun)
             {
                 Console.WriteLine("Dry run mode is enabled. No changes will be made.");
             }
 
             using var serviceProvider = new ServiceCollection()
+                .AddSingleton(Options.Create(options))
                 .AddLogging(configure => configure.AddConsole())
                 .AddSingleton<ProjectConverter>()
-                .AddSingleton<IFileService, NullFileService>()
+                .AddSingleton<IFileService, FileService>()
                 .AddSingleton<ISourceControlService, NullSourceControlService>()
                 .BuildServiceProvider();
 

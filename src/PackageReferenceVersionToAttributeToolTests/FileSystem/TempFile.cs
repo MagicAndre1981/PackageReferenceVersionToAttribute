@@ -29,10 +29,17 @@ namespace PackageReferenceVersionToAttributeToolTests.FileSystem
         /// <inheritdoc/>
         public void Dispose()
         {
-            if (File.Exists(this.Path))
+            foreach (var filePath in new[]
             {
-                Console.WriteLine($"Deleting file: {this.Path}");
-                File.Delete(this.Path);
+                this.Path,
+                $"{this.Path}.bak",
+            })
+            {
+                if (File.Exists(filePath))
+                {
+                    Console.WriteLine($"Deleting file: {filePath}");
+                    File.Delete(filePath);
+                }
             }
         }
 

@@ -43,6 +43,11 @@ namespace PackageReferenceVersionToAttributeExtensionTests.Mocks
         public MockHierarchyItem RootItem { get; }
 
         /// <summary>
+        /// Gets the path.
+        /// </summary>
+        public string Path => this.tempFile.FilePath;
+
+        /// <summary>
         /// Gets or sets the contents.
         /// </summary>
         public string Contents
