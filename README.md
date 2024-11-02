@@ -1,28 +1,42 @@
-# PackageReference Version to attribute
+# PackageReference Version to Attribute
 
-This Visual Studio extension converts PackageReferences Version child elements to attributes.
+This Visual Studio extension and dotnet tool converts PackageReference Version child elements to attributes across your projects.
 
 It works with C# csproj Visual Studio project files.
 
-[Download it from the Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=RamiAbughazaleh.PackageReferenceVersionToAttributeExtension)
+## Getting started with the Visual Studio Extension
 
-## Getting started
-
-1. Download and install the extension.  
+1. [Download and install the extension from the Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=RamiAbughazaleh.PackageReferenceVersionToAttributeExtension).  
 2. Right-click on a project and select `Convert PackageReference Version elements to attributes...`.  
 
-![Preview](Preview.png)
+   ![Preview](Preview.png)
 
 3. Wait until the process finishes.  
-  Check the status bar or the `PackageReferences Version to Attribute Extension` pane in the `Output Window` for details.
+   Check the status bar or the `PackageReferences Version to Attribute Extension` pane in the `Output Window` for details.
+
+## Getting started with the dotnet tool
+
+1. Install the dotnet tool using the following command:  
+   ```bash
+   dotnet tool install PackageReferenceVersionToAttribute.Tool
+
+2. To convert all csproj files in the current directory and its subdirectories, run the tool with the command:  
+   ```bash
+   PackageReferenceVersionToAttribute.Tool .\**\*.csproj
+
+3. For additional options and usage, you can run:
+   ```bash
+   PackageReferenceVersionToAttribute.Tool --help
 
 
-## Technical Details
+## Technical details
 
-This extension will first create a backup of the project file.  
+The extension will first create a backup of the project file.  
 For example, `MyProject.csproj` will be copied to `MyProject.csproj.bak`.  
 
 If the project file is source controlled, it will be checked out for modification.  
+
+### General
 
 The `Version` child elements of `PackageReference` will be converted to a `Version` attribute.  
 For example, the following elements in the `csproj` project file:
@@ -36,12 +50,6 @@ will be converted to this:
 ```
   <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
 ```
-
-
-## Troubleshooting
-
-Check the `PackageReferences Version to Attribute Extension` pane in the `Output Window` for detailed logs.
-
 
 ## Rate and Review
 
