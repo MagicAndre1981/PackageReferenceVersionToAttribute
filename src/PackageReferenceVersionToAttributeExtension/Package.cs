@@ -1,4 +1,4 @@
-﻿// <copyright file="PackageReferenceVersionToAttributeExtensionPackage.cs" company="Rami Abughazaleh">
+﻿// <copyright file="Package.cs" company="Rami Abughazaleh">
 //   Copyright (c) Rami Abughazaleh. All rights reserved.
 // </copyright>
 
@@ -13,8 +13,11 @@ namespace PackageReferenceVersionToAttributeExtension
     using EnvDTE;
     using EnvDTE80;
     using Microsoft.Extensions.DependencyInjection;
+    using Microsoft.Extensions.Logging;
     using Microsoft.VisualStudio;
     using Microsoft.VisualStudio.Shell;
+    using PackageReferenceVersionToAttribute;
+    using PackageReferenceVersionToAttributeExtension.Logging;
     using PackageReferenceVersionToAttributeExtension.Services;
     using Task = System.Threading.Tasks.Task;
 
@@ -47,16 +50,21 @@ namespace PackageReferenceVersionToAttributeExtension
             base.InitializeServices(services);
 
             // register services
-            services.AddSingleton<FileSystemService>();
+            services.AddSingleton<IFileService, FileSystemService>();
+            services.AddSingleton<ISourceControlService, ProjectService>();
 
             services.AddSingleton((serviceProvider)
-                => new LoggingService("PackageReferences Version to Attribute Extension"));
+                => VS.GetRequiredService<DTE, DTE2>());
 
-            services.AddSingleton((serviceProvider)
-                => new ProjectService(
-                    VS.GetRequiredService<DTE, DTE2>(),
-                    serviceProvider.GetRequiredService<LoggingService>(),
-                    serviceProvider.GetRequiredService<FileSystemService>()));
+            services.AddSingleton<BaseCommand>();
+            services.AddSingleton<ProjectService>();
+            services.AddSingleton<ProjectConverter>();
+            services.AddLogging(configure =>
+            {
+                configure.ClearProviders();
+                configure.Services.AddSingleton<ILoggerProvider, CustomLoggerProvider>();
+                configure.SetMinimumLevel(LogLevel.Trace);
+            });
 
             // register commands
             services.RegisterCommands(ServiceLifetime.Singleton, Assembly.GetExecutingAssembly());

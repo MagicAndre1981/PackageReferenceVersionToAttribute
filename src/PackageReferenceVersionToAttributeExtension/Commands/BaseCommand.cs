@@ -6,26 +6,22 @@ namespace PackageReferenceVersionToAttributeExtension
 {
     using System;
     using System.Collections.Generic;
-    using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
-    using System.Xml;
-    using System.Xml.Linq;
     using Community.VisualStudio.Toolkit;
+    using Microsoft.Extensions.Logging;
     using Microsoft.VisualStudio.Shell;
-    using PackageReferenceVersionToAttributeExtension.Services;
+    using PackageReferenceVersionToAttribute;
 
     /// <summary>
     /// Base command.
     /// </summary>
     internal class BaseCommand(
-        LoggingService loggingService,
-        ProjectService projectService,
-        FileSystemService fileSystemService)
+        ILogger<BaseCommand> logger,
+        ProjectConverter projectConverter)
     {
-        private readonly LoggingService loggingService = loggingService;
-        private readonly ProjectService projectService = projectService;
-        private readonly FileSystemService fileSystemService = fileSystemService;
+        private readonly ILogger<BaseCommand> logger = logger;
+        private readonly ProjectConverter projectConverter = projectConverter;
 
         /// <summary>
         /// Converts all &lt;Version&gt; elements within &lt;PackageReference&gt; items in the project file
@@ -43,21 +39,22 @@ namespace PackageReferenceVersionToAttributeExtension
                 var selectedProjects = await this.GetSelectedProjectsAsync();
                 if (!selectedProjects.Any())
                 {
-                    await this.loggingService.LogErrorAsync("No projects selected.");
+                    this.logger.LogError("No projects selected.");
                     await VS.MessageBox.ShowWarningAsync("No project selected.");
                     return;
                 }
 
                 await VS.StatusBar.StartAnimationAsync(StatusAnimation.General);
 
-                await this.ConvertPackageReferenceVersionElementsToAttributesAsync(selectedProjects);
+                await this.projectConverter.ConvertAsync(
+                    selectedProjects.Select(x => x.FullPath));
 
-                await this.loggingService.LogInfoAsync($"Conversion completed successfully.");
+                this.logger.LogInformation($"Conversion completed successfully.");
                 await VS.StatusBar.ShowMessageAsync("Conversion completed successfully.");
             }
             catch (Exception ex)
             {
-                await this.loggingService.LogErrorAsync(ex);
+                this.logger.LogError(ex, "Conversion failed.");
                 await VS.StatusBar.ShowMessageAsync("Conversion failed. Please see the Output Window for details.");
             }
             finally
@@ -94,94 +91,6 @@ namespace PackageReferenceVersionToAttributeExtension
             }
 
             return projects;
-        }
-
-        private async Task ConvertPackageReferenceVersionElementsToAttributesAsync(IEnumerable<Community.VisualStudio.Toolkit.Project> projects)
-        {
-            foreach (var project in projects)
-            {
-                try
-                {
-                    var projectPath = project.FullPath;
-                    if (string.IsNullOrEmpty(projectPath) || !File.Exists(projectPath))
-                    {
-                        continue;
-                    }
-
-                    string message = $"Converting PackageReference Version child elements to attributes in the project file \"{projectPath}\"...";
-                    await this.loggingService.LogInfoAsync(message);
-                    await VS.StatusBar.ShowMessageAsync(message);
-
-                    var document = XDocument.Load(projectPath, LoadOptions.PreserveWhitespace);
-
-                    // Find all PackageReference elements with a <Version> child element
-                    // Use the XML namespace if one is set
-                    XNamespace ns = document.Root.GetDefaultNamespace();
-
-                    if (!string.IsNullOrWhiteSpace(ns.NamespaceName))
-                    {
-                        await this.loggingService.LogInfoAsync($"Found XML namespace \"{ns.NamespaceName}\".");
-                    }
-
-                    // Query for PackageReference elements
-                    var packageReferences = document.Descendants(ns != null ? ns + "PackageReference" : "PackageReference")
-                        .Where(pr => pr.Element(ns != null ? ns + "Version" : "Version") != null)
-                        .ToList();
-                    if (!packageReferences.Any())
-                    {
-                        await this.loggingService.LogInfoAsync($"No PackageReference Version child elements found in the project file \"{projectPath}\".");
-                        continue;
-                    }
-
-                    bool modified = false;
-
-                    // backup project file
-                    await this.fileSystemService.BackupFileAsync(projectPath);
-
-                    // check out files from source control
-                    await this.projectService.CheckOutFileFromSourceControlAsync(projectPath);
-
-                    foreach (var packageReference in packageReferences)
-                    {
-                        var versionElement = packageReference.Element(ns != null ? ns + "Version" : "Version");
-                        if (versionElement != null)
-                        {
-                            // Move the Version element content to an attribute
-                            packageReference.SetAttributeValue("Version", versionElement.Value);
-                            versionElement.Remove();
-
-                            // Check if the PackageReference is empty and set it to self-closing if so
-                            if (!packageReference.HasElements)
-                            {
-                                // This will make sure it's treated as a self-closing tag when saved
-                                // Optionally, trim empty lines around the parent element
-                                packageReference.RemoveNodes(); // Remove empty nodes
-                            }
-
-                            modified = true;
-                        }
-                    }
-
-                    // Save changes if any modifications were made
-                    if (modified)
-                    {
-                        var settings = new XmlWriterSettings
-                        {
-                            OmitXmlDeclaration = document.Declaration == null, // Preserve the XML declaration if it exists.
-                            Indent = false,                                    // Prevents adding any extra indentation
-                            NewLineHandling = NewLineHandling.Replace,
-                        };
-
-                        using var writer = XmlWriter.Create(projectPath, settings);
-
-                        document.Save(writer); // Preserves original formatting, avoids extra lines
-                    }
-                }
-                catch (Exception ex)
-                {
-                    await this.loggingService.LogErrorAsync(ex);
-                }
-            }
         }
 
         private IEnumerable<Project> GetAllProjects(

@@ -5,21 +5,18 @@
 namespace PackageReferenceVersionToAttributeExtension.Services
 {
     using System.IO;
-    using System.Threading.Tasks;
+    using Microsoft.Extensions.Logging;
+    using PackageReferenceVersionToAttribute;
 
     /// <summary>
     /// Provides support for operations on the file system.
     /// </summary>
-    public class FileSystemService(LoggingService loggingService)
+    public class FileSystemService(ILogger<FileSystemService> logger) : IFileService
     {
-        private readonly LoggingService loggingService = loggingService;
+        private readonly ILogger<FileSystemService> logger = logger;
 
-        /// <summary>
-        /// Removes the read-only attribute on the specified file.
-        /// </summary>
-        /// <param name="filePath">The path of the file.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        internal async Task RemoveReadOnlyAttributeAsync(string filePath)
+        /// <inheritdoc/>
+        public void RemoveReadOnlyAttribute(string filePath)
         {
             if (!File.Exists(filePath))
             {
@@ -33,24 +30,20 @@ namespace PackageReferenceVersionToAttributeExtension.Services
             }
 
             // make the file read/write
-            await this.loggingService.LogDebugAsync($"Removing read-only flag on file \"{filePath}\"...");
+            this.logger.LogDebug($"Removing read-only flag on file \"{filePath}\"...");
 
             attributes &= ~FileAttributes.ReadOnly;
             File.SetAttributes(filePath, attributes);
         }
 
-        /// <summary>
-        /// Backs up the specified file.
-        /// </summary>
-        /// <param name="filePath">The path of the file.</param>
-        /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        internal async Task BackupFileAsync(string filePath)
+        /// <inheritdoc/>
+        public void BackupFile(string filePath)
         {
             string backupFilePath = $"{filePath}.bak";
 
-            await this.RemoveReadOnlyAttributeAsync(backupFilePath);
+            this.RemoveReadOnlyAttribute(backupFilePath);
 
-            await this.loggingService.LogDebugAsync($"Copying \"{filePath}\" to \"{backupFilePath}\"...");
+            this.logger.LogDebug($"Copying \"{filePath}\" to \"{backupFilePath}\"...");
 
             File.Copy(filePath, backupFilePath, true);
         }

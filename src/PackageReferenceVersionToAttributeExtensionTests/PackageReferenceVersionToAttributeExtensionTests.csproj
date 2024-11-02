@@ -22,7 +22,7 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.1" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="8.0.0" />
     <PackageReference Include="Microsoft.VisualStudio.Interop" Version="17.11.40262" />
     <PackageReference Include="Microsoft.VisualStudio.Sdk.TestFramework" Version="17.6.16" />
     <PackageReference Include="MSTest.TestAdapter" Version="3.6.1" />
@@ -34,8 +34,5 @@
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\PackageReferenceVersionToAttributeExtension\PackageReferenceVersionToAttributeExtension.csproj" />
-  </ItemGroup>
-  <ItemGroup>
-    <Folder Include="Properties\" />
   </ItemGroup>
 </Project>

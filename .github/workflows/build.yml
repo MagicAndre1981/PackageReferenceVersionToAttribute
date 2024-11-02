@@ -47,14 +47,41 @@ jobs:
         $currentMonthDay = $currentDate.ToString("MMdd")
         $buildVersion = (($buildYear - $firstBuildYear) * 1200) + ([Convert]::ToInt32($currentMonthDay))
         echo "VERSION=$majorVersion.$minorVersion.$buildVersion.${{ github.RUN_NUMBER }}" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf-8 -Append
+        echo "SEM_VERSION=$majorVersion.$minorVersion.$buildVersion" >> $env:GITHUB_ENV
+
+    - name: Set version number for pre-release
+      if: ${{ github.event.inputs.release == '' || github.event.inputs.release == 'false' }}
+      run: |
+        echo "SEM_VERSION=${{ env.SEM_VERSION }}-build-${{ github.RUN_NUMBER }}" >> $env:GITHUB_ENV
 
     - name: Read environmental variables
       run: |
         echo VERSION=${{ env.VERSION }}
+        echo SEM_VERSION=${{ env.SEM_VERSION }}
         echo GITHUB_WORKSPACE=${{ github.WORKSPACE }}
 
     - name: Checkout
       uses: actions/checkout@v4
+    
+    - name: Update AssemblyInfo.cs files
+      run: |
+        $files = Get-ChildItem "${{ github.WORKSPACE }}" -recurse -include "*Properties*" | 
+            ?{ $_.PSIsContainer } | 
+            foreach { Get-ChildItem -Path $_.FullName -Recurse -include AssemblyInfo.* }
+        if (-not $files)
+        {
+            Write-Host "Didn't find any files to update."
+            exit 1
+        }
+        else
+        {
+            foreach ($file in $files) {
+                $filecontent = Get-Content($file)
+                attrib $file -r
+                $filecontent -replace "\d+\.\d+\.\d+\.\d+", "${{ env.VERSION }}" | Out-File $file
+                Write-Host "Version applied to '$file'"
+            }
+        }
 
     - name: Update vsixmanifest files
       run: |
@@ -78,6 +105,26 @@ jobs:
             }
         }
 
+    - name: Update csproj files
+      run: |
+        $files = Get-ChildItem "${{ github.WORKSPACE }}" -recurse | 
+            ?{ $_.PSIsContainer } | 
+            foreach { Get-ChildItem -Path $_.FullName -Recurse -include *.csproj }
+        if (-not $files)
+        {
+            Write-Host "Didn't find any files to update."
+            exit 1
+        }
+        else
+        {
+            foreach ($file in $files) {
+                $filecontent = Get-Content($file)
+                attrib $file -r
+                $filecontent -replace "<Version>\d+\.\d+\.\d+\</Version>", "<Version>${{ env.SEM_VERSION }}</Version>" | Out-File $file
+                Write-Host "Version applied to '$file'"
+            }
+        }
+
     - name: Setup MSBuild.exe
       uses: microsoft/setup-msbuild@v2
             # Adds MSBuild to the PATH: https://github.com/microsoft/setup-msbuild
@@ -96,7 +143,9 @@ jobs:
       # https://github.com/marketplace/actions/upload-a-build-artifact
       with:
         name: PackageReferenceVersionToAttributeExtension-${{ env.VERSION }} ${{matrix.Configuration}}
-        path: .\src\PackageReferenceVersionToAttributeExtension\bin\${{matrix.Configuration}}\PackageReferenceVersionToAttributeExtension.vsix
+        path: |
+          .\src\PackageReferenceVersionToAttributeExtension\bin\${{matrix.Configuration}}\PackageReferenceVersionToAttributeExtension.vsix
+          .\src\PackageReferenceVersionToAttributeTool\bin\${{matrix.Configuration}}\PackageReferenceVersionToAttribute.Tool.${{ env.SEM_VERSION }}.nupkg
         if-no-files-found: error
 
     - name: Publish GitHub Release
@@ -111,6 +160,11 @@ jobs:
         fail_on_unmatched_files: true
         files: |
           ./src/PackageReferenceVersionToAttributeExtension/bin/${{matrix.Configuration}}/PackageReferenceVersionToAttributeExtension.vsix
+          ./src/PackageReferenceVersionToAttributeTool/bin/${{matrix.Configuration}}/PackageReferenceVersionToAttribute.Tool.${{ env.SEM_VERSION }}.nupkg
+
+    - name: Publish NuGet Package
+      if: ${{ matrix.Configuration == 'Release' && github.event_name != 'pull_request' }}
+      run: dotnet nuget push .\src\PackageReferenceVersionToAttributeTool\bin\${{matrix.Configuration}}\PackageReferenceVersionToAttribute.Tool.${{ env.SEM_VERSION }}.nupkg --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json
 
     - name: Publish to Open VSIX
       if: ${{ matrix.Configuration == 'Release' && github.event.inputs.release == 'true' }}

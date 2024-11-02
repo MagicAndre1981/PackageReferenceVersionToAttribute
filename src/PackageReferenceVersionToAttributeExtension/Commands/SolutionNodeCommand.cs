@@ -10,7 +10,6 @@ namespace PackageReferenceVersionToAttributeExtension
     using Community.VisualStudio.Toolkit.DependencyInjection.Core;
     using EnvDTE;
     using Microsoft.VisualStudio.Shell;
-    using PackageReferenceVersionToAttributeExtension.Services;
 
     /// <summary>
     /// Solution node command.
@@ -20,12 +19,10 @@ namespace PackageReferenceVersionToAttributeExtension
         PackageIds.PackageReferenceVersionToAttributeSolutionNodeCommand)]
     internal sealed class SolutionNodeCommand(
         DIToolkitPackage package,
-        LoggingService loggingService,
-        ProjectService projectService,
-        FileSystemService fileSystemService)
+        BaseCommand baseCommand)
         : BaseDICommand(package)
     {
-        private readonly BaseCommand baseCommand = new(loggingService, projectService, fileSystemService);
+        private readonly BaseCommand baseCommand = baseCommand;
 
         /// <inheritdoc/>
         protected override async Task ExecuteAsync(OleMenuCmdEventArgs e)

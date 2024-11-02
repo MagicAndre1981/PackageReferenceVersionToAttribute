@@ -8,30 +8,32 @@ namespace PackageReferenceVersionToAttributeExtension.Services
     using System.Linq;
     using System.Threading.Tasks;
     using EnvDTE80;
+    using Microsoft.Extensions.Logging;
     using Microsoft.VisualStudio.Shell;
+    using PackageReferenceVersionToAttribute;
     using Project = EnvDTE.Project;
 
     /// <summary>
     /// Provides support for operations on a project.
     /// </summary>
     /// <param name="dte">The Visual Studio automation object model.</param>
-    /// <param name="loggingService">The logging service.</param>
-    /// <param name="fileSystemService">The file service.</param>
+    /// <param name="logger">The logger.</param>
+    /// <param name="fileService">The file service.</param>
     public class ProjectService(
         DTE2 dte,
-        LoggingService loggingService,
-        FileSystemService fileSystemService)
+        ILogger<ProjectService> logger,
+        IFileService fileService) : ISourceControlService
     {
         private readonly DTE2 dte = dte;
-        private readonly LoggingService loggingService = loggingService;
-        private readonly FileSystemService fileSystemService = fileSystemService;
+        private readonly ILogger<ProjectService> logger = logger;
+        private readonly IFileService fileService = fileService;
 
         /// <summary>
         /// Checks out the specified file from source control.
         /// </summary>
         /// <param name="filePath">The path of the file.</param>
         /// <returns>A <see cref="Task"/> representing the asynchronous operation.</returns>
-        internal async Task CheckOutFileFromSourceControlAsync(string filePath)
+        public async Task CheckOutFileAsync(string filePath)
         {
             await ThreadHelper.JoinableTaskFactory.SwitchToMainThreadAsync();
 
@@ -49,12 +51,12 @@ namespace PackageReferenceVersionToAttributeExtension.Services
             if (this.dte.SourceControl.IsItemUnderSCC(filePath)
                 && !this.dte.SourceControl.IsItemCheckedOut(filePath))
             {
-                await this.loggingService.LogDebugAsync($"Checking out file \"{filePath}\"...");
+                this.logger.LogDebug($"Checking out file \"{filePath}\"...");
 
                 this.dte.SourceControl.CheckOutItem(filePath);
             }
 
-            await this.fileSystemService.RemoveReadOnlyAttributeAsync(filePath);
+            this.fileService.RemoveReadOnlyAttribute(filePath);
         }
     }
 }
