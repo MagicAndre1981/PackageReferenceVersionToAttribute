@@ -8,6 +8,7 @@ EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{D471DF53-D163-4D29-A64B-5EA63BF9F1AF}"
 	ProjectSection(SolutionItems) = preProject
 		..\.gitignore = ..\.gitignore
+		..\CHANGELOG.md = ..\CHANGELOG.md
 		..\LICENSE = ..\LICENSE
 		..\README.md = ..\README.md
 	EndProjectSection
@@ -21,11 +22,11 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "workflows", "workflows", "{
 		..\.github\workflows\build.yml = ..\.github\workflows\build.yml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageReferenceVersionToAttributeTool", "PackageReferenceVersionToAttributeTool\PackageReferenceVersionToAttributeTool.csproj", "{DB05009A-1CBF-44D3-8C2C-EB23131E8EB6}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageReferenceVersionToAttributeTool", "PackageReferenceVersionToAttributeTool\PackageReferenceVersionToAttributeTool.csproj", "{DB05009A-1CBF-44D3-8C2C-EB23131E8EB6}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageReferenceVersionToAttribute", "PackageReferenceVersionToAttribute\PackageReferenceVersionToAttribute.csproj", "{09405917-B13B-439F-9350-1CE1700008AA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageReferenceVersionToAttribute", "PackageReferenceVersionToAttribute\PackageReferenceVersionToAttribute.csproj", "{09405917-B13B-439F-9350-1CE1700008AA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PackageReferenceVersionToAttributeToolTests", "PackageReferenceVersionToAttributeToolTests\PackageReferenceVersionToAttributeToolTests.csproj", "{4786A5A9-16E9-479E-98EA-F4CE81551222}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PackageReferenceVersionToAttributeToolTests", "PackageReferenceVersionToAttributeToolTests\PackageReferenceVersionToAttributeToolTests.csproj", "{4786A5A9-16E9-479E-98EA-F4CE81551222}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

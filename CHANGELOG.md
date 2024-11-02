@@ -1,6 +1,6 @@
 # Change Log
 
-## v1.0.1102.x (November 2<sup>nd</sup>, 2024)
+## v1.0.1102.24 (November 2<sup>nd</sup>, 2024)
 - Fixed [#2](https://github.com/icnocop/PackageReferenceVersionToAttribute/issues/2) - Added support for converting all projects in a solution, and converting multiple selected projects.
 - Fixed [#1](https://github.com/icnocop/PackageReferenceVersionToAttribute/issues/1) - Preserved the XML declaration if it exists.
 - Fixed [#4](https://github.com/icnocop/PackageReferenceVersionToAttribute/issues/4) - Added support for installating on Visual Studio Arm64.
