@@ -25,30 +25,15 @@ namespace PackageReferenceVersionToAttributeToolTests
         [TestMethod]
         public async Task Run_WithoutAnyParameters_ReturnsErrorAndDisplaysUsage()
         {
+            // Arrange
+            var expectedOutput = await File.ReadAllTextAsync("Usage.txt");
+
             // Act
             var result = await RunToolAsync();
 
             // Assert
             Assert.AreEqual(1, result.ExitCode, result.OutputAndError);
-            Assert.AreEqual(
-                """
-                Description:
-
-                Usage:
-                  PackageReferenceVersionToAttributeTool <inputs>... [options]
-
-                Arguments:
-                  <inputs>  The project files or wildcard patterns to convert.
-
-                Options:
-                  -b, --backup    Create a backup of the project files.
-                  -f, --force     Force conversion even if already configured.
-                  -d, --dry-run   Preview changes without making any modifications.
-                  --version       Show version information
-                  -?, -h, --help  Show help and usage information
-                """,
-                result.Output.Trim(),
-                result.OutputAndError);
+            Assert.AreEqual(expectedOutput, result.Output.Trim(), result.OutputAndError);
             Assert.AreEqual(
                 """
                 Required argument missing for command: 'PackageReferenceVersionToAttributeTool'.

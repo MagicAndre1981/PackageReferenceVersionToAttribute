@@ -6,6 +6,7 @@ namespace PackageReferenceVersionToAttributeTool
 {
     using System.Collections.Generic;
     using System.IO;
+    using System.Linq;
     using Microsoft.Extensions.FileSystemGlobbing;
     using Microsoft.Extensions.FileSystemGlobbing.Abstractions;
 

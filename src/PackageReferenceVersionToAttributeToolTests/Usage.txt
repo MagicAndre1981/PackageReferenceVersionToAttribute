@@ -1,0 +1,15 @@
+﻿Description:
+  Converts PackageReference Version child elements to attributes in C# projects.
+
+Usage:
+  PackageReferenceVersionToAttributeTool <inputs>... [options]
+
+Arguments:
+  <inputs>  The project files or wildcard patterns to convert.
+
+Options:
+  -b, --backup    Create a backup of the project files.
+  -f, --force     Force conversion even if the project files are read-only.
+  -d, --dry-run   Preview changes without making any modifications.
+  --version       Show version information
+  -?, -h, --help  Show help and usage information

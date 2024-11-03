@@ -4,6 +4,7 @@
 
 namespace PackageReferenceVersionToAttributeTool
 {
+    using System.Threading.Tasks;
     using PackageReferenceVersionToAttribute;
 
     /// <summary>
