@@ -40,11 +40,11 @@ namespace PackageReferenceVersionToAttributeTool
 
             var forceOption = new Option<bool>(
                 aliases: ["--force", "-f"],
-                description: "Force conversion even if already configured.");
+                description: "Force conversion even if the project files are read-only.");
 
             var dryRunOption = new Option<bool>(
                 aliases: ["--dry-run", "-d"],
-                "Preview changes without making any modifications.");
+                description: "Preview changes without making any modifications.");
 
             var rootCommand = new RootCommand
             {
