@@ -51,6 +51,7 @@
     <Compile Include="Commands\MultipleProjectNodesCommand.cs" />
     <Compile Include="Commands\SolutionNodeCommand.cs" />
     <Compile Include="Logging\CustomLoggerProvider.cs" />
+    <Compile Include="Properties\AssemblyBindingRedirects.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Commands\ProjectNodeCommand.cs" />
     <Compile Include="Package.cs" />

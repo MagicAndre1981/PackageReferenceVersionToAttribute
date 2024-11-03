@@ -1,5 +1,8 @@
 # Change Log
 
+## v1.0.1103.27 (November 3<sup>rd</sup>, 2024)
+ - Fixed assembly binding redirection error which may occur when loading the extension
+
 ## v1.0.1102.24 (November 2<sup>nd</sup>, 2024)
 - Fixed [#2](https://github.com/icnocop/PackageReferenceVersionToAttribute/issues/2) - Added support for converting all projects in a solution, and converting multiple selected projects.
 - Fixed [#1](https://github.com/icnocop/PackageReferenceVersionToAttribute/issues/1) - Preserved the XML declaration if it exists.
