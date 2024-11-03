@@ -225,7 +225,6 @@ namespace PackageReferenceVersionToAttributeExtensionTests
                     </PropertyGroup>
                     <ItemGroup>
                         <PackageReference Include="PackageA" Version="1.2.3">
-                          
                           <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
                           <PrivateAssets>all</PrivateAssets>
                         </PackageReference>

@@ -3,6 +3,7 @@
 ## TBD
 
 - Added input validation for the mutually exclusive --backup and --dry-run command line options
+- Removed empty lines within `<PackageReference>` elements
 
 ## v1.0.1103.27 (November 3<sup>rd</sup>, 2024)
  - Fixed [#5](https://github.com/icnocop/PackageReferenceVersionToAttribute/issues/5) - Fixed assembly binding redirection error which may occur when loading the extension.
