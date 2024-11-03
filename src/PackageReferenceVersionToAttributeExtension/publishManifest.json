@@ -2,10 +2,19 @@
   "$schema": "http://json.schemastore.org/vsix-publish",
   "categories": [
     "build",
-    "coding"
+    "coding",
+    "other"
   ],
   "identity": {
-    "internalName": "PackageReferenceVersionToAttributeExtension"
+    "internalName": "PackageReferenceVersionToAttributeExtension",
+    "displayName": "PackageReference Version element to attribute",
+    "vsixId": "PackageReferenceVersionToAttributeExtension.81a84c1c-37f0-4fab-96a1-ca03c4de45ca",
+    "description": "Converts PackageReference Version child elements to attributes.",
+    "tags": [
+      "PackageReference",
+      "NuGet",
+      "Version"
+    ]
   },
   "assetFiles": [
     {
