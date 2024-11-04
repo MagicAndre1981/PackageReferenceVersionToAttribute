@@ -1,6 +1,6 @@
 # Change Log
 
-## TBD
+## v1.0.1104.33 (November 4<sup>th</sup>, 2024)
 
 - Added input validation for the mutually exclusive --backup and --dry-run command line options
 - Removed empty lines within `<PackageReference>` elements

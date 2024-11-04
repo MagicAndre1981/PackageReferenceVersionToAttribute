@@ -9,10 +9,10 @@ namespace PackageReferenceVersionToAttributeExtension
     {
         public const string Id = "PackageReferenceVersionToAttributeExtension.81a84c1c-37f0-4fab-96a1-ca03c4de45ca";
         public const string Name = "PackageReference Version element to attribute";
-        public const string Description = @"Converts PackageReference Version elements to attributes.";
+        public const string Description = @"Converts PackageReference Version child elements to attributes.";
         public const string Language = "en-US";
         public const string Version = "1.0";
         public const string Author = "Rami Abughazaleh";
-        public const string Tags = "PackageReference NuGet Version";
+        public const string Tags = "PackageReference;NuGet;Version";
     }
 }

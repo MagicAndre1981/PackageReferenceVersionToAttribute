@@ -9,8 +9,12 @@ on:
     branches: [ "main" ]
   workflow_dispatch:
     inputs:
-      release:
+      publishVsix:
         description: 'Publish extension to the Visual Studio Marketplace?'
+        required: true
+        default: 'false'
+      publishNupkg:
+        description: 'Publish NuGet package to nuget.org?'
         required: true
         default: 'false'
 
@@ -50,7 +54,7 @@ jobs:
         echo "SEM_VERSION=$majorVersion.$minorVersion.$buildVersion" >> $env:GITHUB_ENV
 
     - name: Set version number for pre-release
-      if: ${{ github.event.inputs.release == '' || github.event.inputs.release == 'false' }}
+      if: ${{ github.event.inputs.publishNupkg == '' || github.event.inputs.publishNupkg == 'false' }}
       run: |
         echo "SEM_VERSION=${{ env.SEM_VERSION }}-build-${{ github.RUN_NUMBER }}" >> $env:GITHUB_ENV
 
@@ -149,7 +153,7 @@ jobs:
         if-no-files-found: error
 
     - name: Publish GitHub Release
-      if: ${{ matrix.Configuration == 'Release' && github.event.inputs.release == 'true' }}
+      if: ${{ matrix.Configuration == 'Release' && (github.event.inputs.publishNupkg == 'true' || github.event.inputs.publishVsix == 'true') }}
       uses: softprops/action-gh-release@v2.0.8
       with:
         name: v${{ env.VERSION }}
@@ -163,11 +167,11 @@ jobs:
           ./src/PackageReferenceVersionToAttributeTool/bin/${{matrix.Configuration}}/PackageReferenceVersionToAttribute.Tool.${{ env.SEM_VERSION }}.nupkg
 
     - name: Publish NuGet Package
-      if: ${{ matrix.Configuration == 'Release' && github.event_name != 'pull_request' }}
+      if: ${{ matrix.Configuration == 'Release' && github.event_name != 'pull_request' && github.event.inputs.publishNupkg == 'true' }}
       run: dotnet nuget push .\src\PackageReferenceVersionToAttributeTool\bin\${{matrix.Configuration}}\PackageReferenceVersionToAttribute.Tool.${{ env.SEM_VERSION }}.nupkg --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json
 
     - name: Publish to Open VSIX
-      if: ${{ matrix.Configuration == 'Release' && github.event.inputs.release == 'true' }}
+      if: ${{ matrix.Configuration == 'Release' && github.event_name != 'pull_request' && github.event.inputs.publishNupkg == 'true' }}
       run: |
         [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
         $vsixFile = ".\src\PackageReferenceVersionToAttributeExtension\bin\${{matrix.Configuration}}\PackageReferenceVersionToAttributeExtension.vsix"
@@ -185,7 +189,7 @@ jobs:
         }
 
     - name: Publish extension to the Visual Studio Marketplace
-      if: ${{ matrix.Configuration == 'Release' && github.event.inputs.release == 'true' }}
+      if: ${{ matrix.Configuration == 'Release' && github.event.inputs.publishVsix == 'true' }}
       uses: cezarypiatek/VsixPublisherAction@1.1
       with:
         extension-file: .\src\PackageReferenceVersionToAttributeExtension\bin\${{matrix.Configuration}}\PackageReferenceVersionToAttributeExtension.vsix
