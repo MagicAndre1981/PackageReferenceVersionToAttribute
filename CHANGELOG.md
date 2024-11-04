@@ -3,6 +3,7 @@
 ## TBD
 
 - Added support for converting projects within sln files on the command line
+- Preserve line ending characters
 
 ## v1.0.1104.33 (November 4<sup>th</sup>, 2024)
 

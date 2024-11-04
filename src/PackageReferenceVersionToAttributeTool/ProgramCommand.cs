@@ -20,7 +20,7 @@ namespace PackageReferenceVersionToAttributeTool
         {
             var inputsArgument = new Argument<string[]>(
                 name: "inputs",
-                description: "The project files or wildcard patterns to convert.")
+                description: "The file paths and patterns which match solution and project files to convert.")
             {
                 Arity = ArgumentArity.OneOrMore,
             };

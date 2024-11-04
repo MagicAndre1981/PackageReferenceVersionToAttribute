@@ -161,8 +161,7 @@ namespace PackageReferenceVersionToAttributeExtensionTests
             this.command.Invoke(null);
 
             // Assert
-            Assert.AreEqual(
-                """
+            string expectedContents = """
                 <Project Sdk="Microsoft.NET.Sdk">
                     <PropertyGroup>
                         <TargetFramework>net8.0</TargetFramework>
@@ -171,12 +170,13 @@ namespace PackageReferenceVersionToAttributeExtensionTests
                         <PackageReference Include="PackageA" Version="1.2.3" />
                     </ItemGroup>
                 </Project>
-                """,
-                project.Contents);
+                """;
+            Assert.AreEqual(expectedContents, project.Contents);
 
             string backupFilePath = $"{project.Path}.bak";
             Assert.IsTrue(File.Exists(backupFilePath));
-            Assert.AreEqual(Contents, File.ReadAllText(backupFilePath));
+            string actualContents = File.ReadAllText(backupFilePath);
+            Assert.AreEqual(Contents, actualContents);
         }
 
         /// <summary>

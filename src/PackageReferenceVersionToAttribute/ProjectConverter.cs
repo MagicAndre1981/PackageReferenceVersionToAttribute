@@ -146,11 +146,14 @@ namespace PackageReferenceVersionToAttribute
                 this.fileService.RemoveReadOnlyAttribute(projectFilePath);
             }
 
+            string detectedLineEnding = DetectLineEnding(projectFilePath);
+
             var settings = new XmlWriterSettings
             {
                 OmitXmlDeclaration = document.Declaration == null, // Preserve the XML declaration if it exists.
-                Indent = false,                                    // Prevents adding any extra indentation
-                NewLineHandling = NewLineHandling.Replace,
+                Indent = false,                                    // Prevents adding any extra indentation.
+                NewLineHandling = NewLineHandling.Replace,         // Preserve the same line endings.
+                NewLineChars = detectedLineEnding,                 // Preserve the same line endings.
             };
 
             if (this.options.DryRun)
@@ -168,6 +171,28 @@ namespace PackageReferenceVersionToAttribute
                 using var writer = XmlWriter.Create(projectFilePath, settings);
                 document.Save(writer); // Preserves original formatting, avoids extra lines
             }
+        }
+
+        public static string DetectLineEnding(string filePath)
+        {
+            using var reader = new StreamReader(filePath);
+            int ch;
+            char previousChar = '\0';
+
+            while ((ch = reader.Read()) != -1)
+            {
+                char currentChar = (char)ch;
+
+                if (currentChar == '\n')
+                {
+                    return previousChar == '\r' ? "\r\n" : "\n";
+                }
+
+                previousChar = currentChar;
+            }
+
+            // Default to system line ending if no line ending found
+            return Environment.NewLine;
         }
     }
 }

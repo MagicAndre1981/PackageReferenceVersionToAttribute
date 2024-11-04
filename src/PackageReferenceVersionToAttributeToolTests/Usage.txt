@@ -5,7 +5,7 @@ Usage:
   PackageReferenceVersionToAttributeTool <inputs>... [options]
 
 Arguments:
-  <inputs>  The project files or wildcard patterns to convert.
+  <inputs>  The file paths and patterns which match solution and project files to convert.
 
 Options:
   -b, --backup    Create a backup of the project files.

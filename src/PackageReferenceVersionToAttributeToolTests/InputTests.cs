@@ -86,7 +86,7 @@ namespace PackageReferenceVersionToAttributeToolTests
                 result.OutputAndError);
             Assert.AreEqual(string.Empty, result.Error.Trim());
 
-            Assert.AreEqual(
+            string expectedContents =
                 """
                 <Project Sdk="Microsoft.NET.Sdk">
                     <PropertyGroup>
@@ -96,8 +96,9 @@ namespace PackageReferenceVersionToAttributeToolTests
                         <PackageReference Include="PackageA" Version="1.2.3" />
                     </ItemGroup>
                 </Project>
-                """,
-                projectA.ReadAllText());
+                """;
+            string actualContents = projectA.ReadAllText();
+            Assert.AreEqual(expectedContents, actualContents);
         }
 
         /// <summary>
