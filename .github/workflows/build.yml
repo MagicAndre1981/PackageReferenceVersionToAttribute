@@ -13,8 +13,12 @@ on:
         description: 'Publish extension to the Visual Studio Marketplace?'
         required: true
         default: 'false'
-      publishNupkg:
-        description: 'Publish NuGet package to nuget.org?'
+      skipPublishNupkg:
+        description: 'Skip publish NuGet package?'
+        required: true
+        default: 'false'
+      stableRelease:
+        description: 'Is NuGet package a stable release?'
         required: true
         default: 'false'
 
@@ -54,7 +58,7 @@ jobs:
         echo "SEM_VERSION=$majorVersion.$minorVersion.$buildVersion" >> $env:GITHUB_ENV
 
     - name: Set version number for pre-release
-      if: ${{ github.event.inputs.publishNupkg == '' || github.event.inputs.publishNupkg == 'false' }}
+      if: ${{ github.event.inputs.stableRelease == '' || github.event.inputs.stableRelease == 'false' }}
       run: |
         echo "SEM_VERSION=${{ env.SEM_VERSION }}-build-${{ github.RUN_NUMBER }}" >> $env:GITHUB_ENV
 
@@ -153,7 +157,7 @@ jobs:
         if-no-files-found: error
 
     - name: Publish GitHub Release
-      if: ${{ matrix.Configuration == 'Release' && (github.event.inputs.publishNupkg == 'true' || github.event.inputs.publishVsix == 'true') }}
+      if: ${{ matrix.Configuration == 'Release' && github.event.inputs.publishVsix == 'true' }}
       uses: softprops/action-gh-release@v2.0.8
       with:
         name: v${{ env.VERSION }}
@@ -164,14 +168,13 @@ jobs:
         fail_on_unmatched_files: true
         files: |
           ./src/PackageReferenceVersionToAttributeExtension/bin/${{matrix.Configuration}}/PackageReferenceVersionToAttributeExtension.vsix
-          ./src/PackageReferenceVersionToAttributeTool/bin/${{matrix.Configuration}}/PackageReferenceVersionToAttribute.Tool.${{ env.SEM_VERSION }}.nupkg
 
     - name: Publish NuGet Package
-      if: ${{ matrix.Configuration == 'Release' && github.event_name != 'pull_request' && github.event.inputs.publishNupkg == 'true' }}
+      if: ${{ matrix.Configuration == 'Release' && github.event_name != 'pull_request' && (github.event.inputs.skipPublishNupkg == '' || github.event.inputs.skipPublishNupkg == 'false') }}
       run: dotnet nuget push .\src\PackageReferenceVersionToAttributeTool\bin\${{matrix.Configuration}}\PackageReferenceVersionToAttribute.Tool.${{ env.SEM_VERSION }}.nupkg --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json
 
     - name: Publish to Open VSIX
-      if: ${{ matrix.Configuration == 'Release' && github.event_name != 'pull_request' && github.event.inputs.publishNupkg == 'true' }}
+      if: ${{ matrix.Configuration == 'Release' && github.event_name != 'pull_request' && (github.event.inputs.skipPublishNupkg == '' || github.event.inputs.skipPublishNupkg == 'false') }}
       run: |
         [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
         $vsixFile = ".\src\PackageReferenceVersionToAttributeExtension\bin\${{matrix.Configuration}}\PackageReferenceVersionToAttributeExtension.vsix"

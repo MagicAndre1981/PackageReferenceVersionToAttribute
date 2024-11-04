@@ -1,13 +1,13 @@
 # PackageReference Version to Attribute
 
-This Visual Studio extension and dotnet tool converts PackageReference Version child elements to attributes across your projects.
+This Visual Studio extension and dotnet tool converts `PackageReference` `Version` child elements to attributes in C# project files (`csproj`).
 
-It works with C# csproj Visual Studio project files.
+It can also convert all projects in a Visual Studio solution file (`sln`).
 
 ## Getting started with the Visual Studio Extension
 
 1. [Download and install the extension from the Visual Studio Marketplace](https://marketplace.visualstudio.com/items?itemName=RamiAbughazaleh.PackageReferenceVersionToAttributeExtension).  
-2. Right-click on a project and select `Convert PackageReference Version elements to attributes...`.  
+2. Right-click on the root `Solution` node, or one or more projects, and select `Convert PackageReference Version elements to attributes...`.  
 
    ![Preview](Preview.png)
 
@@ -31,7 +31,7 @@ It works with C# csproj Visual Studio project files.
 
 ## Technical details
 
-The extension will first create a backup of the project file.  
+The extension will create a backup of each project file.  
 For example, `MyProject.csproj` will be copied to `MyProject.csproj.bak`.  
 
 If the project file is source controlled, it will be checked out for modification.  
