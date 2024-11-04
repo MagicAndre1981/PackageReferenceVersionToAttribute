@@ -106,6 +106,15 @@ namespace PackageReferenceVersionToAttribute
                     packageReferenceVersionElement.SetAttributeValue("Version", versionElement.Value);
                     versionElement.Remove();
 
+                    // remove empty child nodes within the <PackageReference>
+                    var childNodes = packageReferenceVersionElement.Nodes()
+                        .OfType<XText>()
+                        .Where(x => string.IsNullOrWhiteSpace(x.Value));
+                    foreach (var node in childNodes)
+                    {
+                        node.Remove();
+                    }
+
                     // Check if the PackageReference is empty and set it to self-closing if so
                     if (!packageReferenceVersionElement.HasElements)
                     {
@@ -136,27 +145,6 @@ namespace PackageReferenceVersionToAttribute
             if (this.options.Force)
             {
                 this.fileService.RemoveReadOnlyAttribute(projectFilePath);
-            }
-
-            // remove empty lines within <PackageReference> elements
-            // Select all <PackageReference> elements
-            var packageReferenceElements = document.XPathSelectElements("//PackageReference");
-
-            foreach (var packageReferenceElement in packageReferenceElements)
-            {
-                // Get all the child nodes of the <PackageReference>
-                var childNodes = packageReferenceElement.Nodes();
-
-                // Iterate through the child nodes
-                foreach (var node in childNodes)
-                {
-                    // Check if the node is a text node and contains only whitespace
-                    if (node is XText textNode && string.IsNullOrWhiteSpace(textNode.Value))
-                    {
-                        // Remove the empty line
-                        textNode.Remove();
-                    }
-                }
             }
 
             var settings = new XmlWriterSettings
