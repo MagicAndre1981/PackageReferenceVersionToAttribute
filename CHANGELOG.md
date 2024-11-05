@@ -1,6 +1,6 @@
 # Change Log
 
-## TBD
+## v1.0.1105.37 (November 5<sup>th</sup>, 2024)
 
 - Added support for converting projects within sln files on the command line
 - Preserve line ending characters
