@@ -4,6 +4,7 @@
 
 namespace PackageReferenceVersionToAttributeExtension.Services
 {
+    using System;
     using System.IO;
     using System.Linq;
     using System.Threading.Tasks;
@@ -42,7 +43,18 @@ namespace PackageReferenceVersionToAttributeExtension.Services
                     && (!this.dte.Solution.Projects.Cast<Project>().Any(x =>
                     {
                         ThreadHelper.ThrowIfNotOnUIThread();
-                        return x.FileName == filePath;
+
+                        try
+                        {
+                            return x.FileName == filePath;
+                        }
+                        catch (NotImplementedException ex)
+                        {
+                            // ex. an unloaded project has type DteGenericProject
+                            // ex. Exception thrown: 'System.NotImplementedException' in Microsoft.VisualStudio.CommonIDE.dll
+                            this.logger.LogWarning(ex, $"Failed to get file name for project '{x.Name}'.");
+                            return false;
+                        }
                     }))))
             {
                 return;

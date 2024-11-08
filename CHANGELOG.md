@@ -1,5 +1,11 @@
 # Change Log
 
+## v1.0.1108.39 (November 8<sup>th</sup>, 2024)
+
+- Fixed issue where the extension would create multiple output window panes
+- Fixed issue where exceptions were not being written to the output window pane
+- Fixed issue when trying to get the file name of unloaded projects
+
 ## v1.0.1105.37 (November 5<sup>th</sup>, 2024)
 
 - Added support for converting projects within sln files on the command line

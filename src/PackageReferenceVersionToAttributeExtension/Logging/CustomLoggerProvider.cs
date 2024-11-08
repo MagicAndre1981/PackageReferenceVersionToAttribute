@@ -5,6 +5,7 @@
 namespace PackageReferenceVersionToAttributeExtension.Logging
 {
     using System;
+    using Microsoft.Extensions.DependencyInjection;
     using Microsoft.Extensions.Logging;
     using PackageReferenceVersionToAttributeExtension.Services;
 
@@ -13,9 +14,20 @@ namespace PackageReferenceVersionToAttributeExtension.Logging
     /// </summary>
     internal sealed class CustomLoggerProvider : ILoggerProvider, IDisposable
     {
+        private readonly IServiceProvider serviceProvider;
+
+        /// <summary>
+        /// Initializes a new instance of the <see cref="CustomLoggerProvider"/> class.
+        /// </summary>
+        /// <param name="serviceProvider">The service provider.</param>
+        public CustomLoggerProvider(IServiceProvider serviceProvider)
+        {
+            this.serviceProvider = serviceProvider;
+        }
+
         /// <inheritdoc/>
         public ILogger CreateLogger(string categoryName)
-            => new OutputWindowLogger();
+            => this.serviceProvider.GetRequiredService<OutputWindowLogger>();
 
         /// <inheritdoc/>
         public void Dispose()

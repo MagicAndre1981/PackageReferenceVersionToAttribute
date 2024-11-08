@@ -35,6 +35,10 @@ namespace PackageReferenceVersionToAttributeExtension.Services
             if (formatter != null)
             {
                 var message = formatter(state, exception);
+                if (exception != null)
+                {
+                    message += " " + exception.ToString();
+                }
 
                 try
                 {

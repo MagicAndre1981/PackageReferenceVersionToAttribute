@@ -150,11 +150,10 @@ jobs:
       uses: actions/upload-artifact@v4
       # https://github.com/marketplace/actions/upload-a-build-artifact
       with:
-        name: PackageReferenceVersionToAttributeExtension-${{ env.VERSION }} ${{matrix.Configuration}}
+        name: PackageReferenceVersionToAttribute-${{ env.VERSION }} ${{matrix.Configuration}}
         path: |
           .\src\PackageReferenceVersionToAttributeExtension\bin\${{matrix.Configuration}}\PackageReferenceVersionToAttributeExtension.vsix
           .\src\PackageReferenceVersionToAttributeTool\bin\${{matrix.Configuration}}\PackageReferenceVersionToAttribute.Tool.${{ env.SEM_VERSION }}.nupkg
-        if-no-files-found: error
 
     - name: Publish GitHub Release
       if: ${{ matrix.Configuration == 'Release' && github.event.inputs.publishVsix == 'true' }}
@@ -174,7 +173,7 @@ jobs:
       run: dotnet nuget push .\src\PackageReferenceVersionToAttributeTool\bin\${{matrix.Configuration}}\PackageReferenceVersionToAttribute.Tool.${{ env.SEM_VERSION }}.nupkg --api-key ${{ secrets.NUGET_KEY }} --source https://api.nuget.org/v3/index.json
 
     - name: Publish to Open VSIX
-      if: ${{ matrix.Configuration == 'Release' && github.event_name != 'pull_request' && (github.event.inputs.skipPublishNupkg == '' || github.event.inputs.skipPublishNupkg == 'false') }}
+      if: ${{ matrix.Configuration == 'Release' && github.event_name != 'pull_request' && (github.event.inputs.publishVsix == 'true') }}
       run: |
         [Reflection.Assembly]::LoadWithPartialName("System.Web") | Out-Null
         $vsixFile = ".\src\PackageReferenceVersionToAttributeExtension\bin\${{matrix.Configuration}}\PackageReferenceVersionToAttributeExtension.vsix"

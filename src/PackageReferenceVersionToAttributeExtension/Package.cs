@@ -65,6 +65,7 @@ namespace PackageReferenceVersionToAttributeExtension
                 .AddSingleton<BaseCommand>()
                 .AddSingleton<ProjectService>()
                 .AddSingleton<ProjectConverter>()
+                .AddSingleton<OutputWindowLogger>()
                 .AddLogging(configure =>
                 {
                     configure.ClearProviders();
