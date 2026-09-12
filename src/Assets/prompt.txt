@@ -1,0 +1,11 @@
+Create a small logo/icon for a Visual Studio extension that converts a project's PackageReference's Version element to an attribute (XML).
+
+For example, from this:
+    <PackageReference Include="Newtonsoft.Json">
+      <Version>13.0.3</Version>
+    </PackageReference>
+
+To this:
+<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+
+So the small logo/icon should basically show XML transformation.
